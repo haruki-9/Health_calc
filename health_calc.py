@@ -25,6 +25,45 @@ def convert_height_to_cm(height_str):
 def calculate_mhr(age):
     return 220 - age
 
+def exercise_plan(age, height, weight, goal):
+    plan = ""
+    bmi = weight / ((height / 100) ** 2)
+
+    if goal == "Weight loss":
+        plan = f"""
+        - 🏃‍♂️ Cardio: 30–45 mins/day (5x/week)
+        - 🧘 Stretching/Yoga: 15 mins/day
+        - 🥗 Focus on calorie deficit diet
+        - 🏋️ Light weight training (2–3x/week)
+        """
+    elif goal == "Muscle gain":
+        plan = f"""
+        - 🏋️ Resistance Training: 4–5x/week (progressive overload)
+        - 🍗 High protein diet
+        - 💤 Sleep: 7–9 hours
+        - 🧘 Light stretching for recovery
+        """
+    elif goal == "Strength building":
+        plan = f"""
+        - 🏋️ Compound lifts: 3–4x/week (squats, deadlifts, bench press)
+        - 🥩 Balanced macros, sufficient carbs
+        - 🧘 Mobility work and recovery
+        """
+    elif goal == "Flexibility & Mobility":
+        plan = f"""
+        - 🧘 Yoga/Pilates: 3–5x/week
+        - 🏃 Light cardio: 2x/week
+        - 💧 Stay hydrated
+        """
+    else:  # General Fitness
+        plan = f"""
+        - 🚶 30 mins walk daily
+        - 🏋️ 3x/week full-body workout
+        - 🧘 Stretching post-workout
+        - 🥗 Balanced diet
+        """
+    return f"### Personalized Exercise Plan\n{plan}"
+
 # --- Symptom Checker Data ---
 
 possible_symptoms = {
@@ -128,7 +167,13 @@ st.markdown("Welcome! Choose a tool from the sidebar.")
 
 option = st.sidebar.selectbox(
     "Choose a Tool",
-    ["Ideal Body Weight Calculator", "Max Heart Rate Calculator", "Symptom Checker", "Nutrition Analyzer"]
+    [
+        "Ideal Body Weight Calculator", 
+        "Max Heart Rate Calculator", 
+        "Symptom Checker", 
+        "Nutrition Analyzer", 
+        "Exercise Planner"
+    ]
 )
 
 if option == "Ideal Body Weight Calculator":
@@ -178,3 +223,21 @@ elif option == "Nutrition Analyzer":
         else:
             st.error("Invalid height format.")
 
+elif option == "Exercise Planner":
+    st.header("🏋️ Exercise Planner")
+    with st.form("exercise_form"):
+        age = st.number_input("Enter your age", min_value=10, max_value=100)
+        height = st.number_input("Enter your height in cm", min_value=100, max_value=250)
+        weight = st.number_input("Enter your weight in kg", min_value=30, max_value=200)
+        goal = st.selectbox("Select your fitness goal", [
+            "Weight loss",
+            "Muscle gain",
+            "Strength building",
+            "Flexibility & Mobility",
+            "General Fitness"
+        ])
+        submitted = st.form_submit_button("Get My Plan")
+
+    if submitted:
+        plan = exercise_plan(age, height, weight, goal)
+        st.markdown(plan)
