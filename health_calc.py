@@ -25,100 +25,22 @@ def convert_height_to_cm(height_str):
 def calculate_mhr(age):
     return 220 - age
 
-def exercise_plan(age, height, weight, goal):
-    plan = ""
-    bmi = weight / ((height / 100) ** 2)
-
-    if goal == "Weight loss":
-        plan = f"""
-        - 🏃‍♂️ Cardio: 30–45 mins/day (5x/week)
-        - 🧘 Stretching/Yoga: 15 mins/day
-        - 🥗 Focus on calorie deficit diet
-        - 🏋️ Light weight training (2–3x/week)
-        """
-    elif goal == "Muscle gain":
-        plan = f"""
-        - 🏋️ Resistance Training: 4–5x/week (progressive overload)
-        - 🍗 High protein diet
-        - 💤 Sleep: 7–9 hours
-        - 🧘 Light stretching for recovery
-        """
-    elif goal == "Strength building":
-        plan = f"""
-        - 🏋️ Compound lifts: 3–4x/week (squats, deadlifts, bench press)
-        - 🥩 Balanced macros, sufficient carbs
-        - 🧘 Mobility work and recovery
-        """
-    elif goal == "Flexibility & Mobility":
-        plan = f"""
-        - 🧘 Yoga/Pilates: 3–5x/week
-        - 🏃 Light cardio: 2x/week
-        - 💧 Stay hydrated
-        """
-    else:  # General Fitness
-        plan = f"""
-        - 🚶 30 mins walk daily
-        - 🏋️ 3x/week full-body workout
-        - 🧘 Stretching post-workout
-        - 🥗 Balanced diet
-        """
-    return f"### Personalized Exercise Plan\n{plan}"
-
 # --- Symptom Checker Data ---
 
 possible_symptoms = {
-    "headache": {
-        "cause": "Dehydration, stress, heat exposure, or underlying medical condition",
-        "solution": "Drink water, rest, reduce screen time. If persistent, consult a doctor."
-    },
-    "fatigue": {
-        "cause": "Lack of sleep, poor diet, anemia, dehydration, or heat exhaustion",
-        "solution": "Get proper sleep, hydrate, eat well. If it continues, see a doctor."
-    },
-    "cold": {
-        "cause": "Common cold virus, allergies, or sudden temperature changes",
-        "solution": "Stay warm, rest, drink fluids. OTC meds may help."
-    },
-    "fever": {
-        "cause": "Infection, heat stroke, or inflammatory condition",
-        "solution": "Hydrate, use paracetamol. If high or lasts >2 days, see a doctor."
-    },
-    "vomiting": {
-        "cause": "Food poisoning, stomach flu, or heat-related illness",
-        "solution": "Use ORS, avoid solids briefly. Consult if >24 hours."
-    },
-    "dizziness": {
-        "cause": "Low BP, dehydration, heat exhaustion, or anemia",
-        "solution": "Sit/lie down, hydrate. Frequent episodes need a doctor."
-    },
-    "dehydration": {
-        "cause": "Low fluid intake, sweating, or sun exposure",
-        "solution": "Drink ORS, rest in shade. Severe = medical help."
-    },
-    "diarrhea": {
-        "cause": "Food poisoning, bad water, or infection",
-        "solution": "Hydrate with ORS, avoid oily food. >2 days = doctor."
-    },
-    "sunburn": {
-        "cause": "Too much UV exposure",
-        "solution": "Use aloe vera/lotion. Severe blisters? See doctor."
-    },
-    "heat rash": {
-        "cause": "Blocked sweat glands",
-        "solution": "Keep dry/cool, loose clothes, powder or mild steroid."
-    },
-    "muscle cramps": {
-        "cause": "Electrolyte imbalance or overexertion",
-        "solution": "Stretch, drink coconut water. Frequent? Medical review."
-    },
-    "nausea": {
-        "cause": "Heat exhaustion, bad food, dehydration",
-        "solution": "Rest, hydrate, avoid strong smells. If severe, see doctor."
-    },
-    "sore throat": {
-        "cause": "Virus, dry air, or allergies",
-        "solution": "Salt water gargle, herbal teas. >3 days = doctor."
-    }
+    "headache": {"cause": "Dehydration, stress, heat exposure, or underlying medical condition", "solution": "Drink water, rest, reduce screen time. If persistent, consult a doctor."},
+    "fatigue": {"cause": "Lack of sleep, poor diet, anemia, dehydration, or heat exhaustion", "solution": "Get proper sleep, hydrate, eat well. If it continues, see a doctor."},
+    "cold": {"cause": "Common cold virus, allergies, or sudden temperature changes", "solution": "Stay warm, rest, drink fluids. OTC meds may help."},
+    "fever": {"cause": "Infection, heat stroke, or inflammatory condition", "solution": "Hydrate, use paracetamol. If high or lasts >2 days, see a doctor."},
+    "vomiting": {"cause": "Food poisoning, stomach flu, or heat-related illness", "solution": "Use ORS, avoid solids briefly. Consult if >24 hours."},
+    "dizziness": {"cause": "Low BP, dehydration, heat exhaustion, or anemia", "solution": "Sit/lie down, hydrate. Frequent episodes need a doctor."},
+    "dehydration": {"cause": "Low fluid intake, sweating, or sun exposure", "solution": "Drink ORS, rest in shade. Severe = medical help."},
+    "diarrhea": {"cause": "Food poisoning, bad water, or infection", "solution": "Hydrate with ORS, avoid oily food. >2 days = doctor."},
+    "sunburn": {"cause": "Too much UV exposure", "solution": "Use aloe vera/lotion. Severe blisters? See doctor."},
+    "heat rash": {"cause": "Blocked sweat glands", "solution": "Keep dry/cool, loose clothes, powder or mild steroid."},
+    "muscle cramps": {"cause": "Electrolyte imbalance or overexertion", "solution": "Stretch, drink coconut water. Frequent? Medical review."},
+    "nausea": {"cause": "Heat exhaustion, bad food, dehydration", "solution": "Rest, hydrate, avoid strong smells. If severe, see doctor."},
+    "sore throat": {"cause": "Virus, dry air, or allergies", "solution": "Salt water gargle, herbal teas. >3 days = doctor."}
 }
 
 # --- Nutrition Analyzer ---
@@ -126,18 +48,15 @@ possible_symptoms = {
 def nutrition_analyzer(age, gen, height_cm, weight_kg, diet_type):
     caloric_needs = 2500  # basic estimate
     st.write(f"### Your daily caloric needs: **{caloric_needs} calories**")
-
     if diet_type.lower() == "vegan":
         st.subheader("Sample Vegan Diet Plan")
         st.markdown("""
         **Breakfast:**  
         - Oatmeal with almond milk, banana, and walnuts  
         - Whole grain toast with avocado and cherry tomatoes
-
         **Lunch:**  
         - Lentil soup with whole grain bread  
         - Quinoa salad with roasted vegetables and chickpeas
-
         **Dinner:**  
         - Vegan stir-fry with tofu, vegetables, and brown rice  
         - Grilled portobello mushrooms with quinoa
@@ -148,17 +67,45 @@ def nutrition_analyzer(age, gen, height_cm, weight_kg, diet_type):
         **Breakfast:**  
         - Scrambled eggs with whole grain toast and berries  
         - Greek yogurt with granola and honey
-
         **Lunch:**  
         - Grilled chicken with brown rice and veggies  
         - Turkey and avocado wrap
-
         **Dinner:**  
         - Grilled salmon with quinoa and vegetables  
         - Chicken stir-fry with rice
         """)
     else:
         st.error("Invalid diet type. Please choose vegan or non-vegan.")
+
+# --- Exercise Planner ---
+
+def get_exercise_plan(goal, age, height_cm, weight_kg):
+    if goal == "Weight Loss":
+        return """
+        **Recommended Plan (Weight Loss):**
+        - **Cardio**: 30–45 min brisk walk/jog, 5 days/week  
+        - **Strength**: Light resistance training, 3 days/week  
+        - **Flexibility**: Yoga/stretching, 3 days/week  
+        - **Tips**: Calorie deficit, hydrate well
+        """
+    elif goal == "Gain Mass":
+        return """
+        **Recommended Plan (Gain Mass):**
+        - **Strength**: Heavy lifting, compound exercises (4–5x/week)  
+        - **Cardio**: Light, 2x/week to maintain health  
+        - **Diet**: Caloric surplus, high protein  
+        - **Tips**: Track progress weekly
+        """
+    elif goal == "Improve Muscle Tone":
+        return """
+        **Recommended Plan (Muscle Tone):**
+        - **Strength**: Moderate weights, high reps (4x/week)  
+        - **Cardio**: HIIT 2–3x/week  
+        - **Flexibility**: Foam rolling, stretching post-workout  
+        - **Tips**: Consistency over intensity
+        """
+    else:
+        return "**Invalid Goal**"
 
 # --- Streamlit App UI ---
 
@@ -168,11 +115,11 @@ st.markdown("Welcome! Choose a tool from the sidebar.")
 option = st.sidebar.selectbox(
     "Choose a Tool",
     [
-        "Ideal Body Weight Calculator", 
-        "Max Heart Rate Calculator", 
-        "Symptom Checker", 
-        "Nutrition Analyzer", 
-        "Exercise Planner"
+        "Ideal Body Weight Calculator",
+        "Max Heart Rate Calculator",
+        "Symptom Checker",
+        "Nutrition Analyzer",
+        "Exercise Planner"  # <-- NEW SECTION
     ]
 )
 
@@ -215,7 +162,6 @@ elif option == "Nutrition Analyzer":
     height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
     weight_kg = st.number_input("Enter your weight in kg", min_value=10.0, max_value=300.0)
     diet_type = st.selectbox("Choose your diet type", ["vegan", "non-vegan"])
-
     if st.button("Analyze Nutrition"):
         height_cm = convert_height_to_cm(height_str)
         if height_cm:
@@ -224,20 +170,17 @@ elif option == "Nutrition Analyzer":
             st.error("Invalid height format.")
 
 elif option == "Exercise Planner":
-    st.header("🏋️ Exercise Planner")
-    with st.form("exercise_form"):
-        age = st.number_input("Enter your age", min_value=10, max_value=100)
-        height = st.number_input("Enter your height in cm", min_value=100, max_value=250)
-        weight = st.number_input("Enter your weight in kg", min_value=30, max_value=200)
-        goal = st.selectbox("Select your fitness goal", [
-            "Weight loss",
-            "Muscle gain",
-            "Strength building",
-            "Flexibility & Mobility",
-            "General Fitness"
-        ])
-        submitted = st.form_submit_button("Get My Plan")
+    st.header("💪 Exercise Planner")
+    age = st.number_input("Enter your age", min_value=1, max_value=120)
+    height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
+    weight_kg = st.number_input("Enter your weight in kg", min_value=10.0, max_value=300.0)
+    goal = st.selectbox("What's your fitness goal?", ["Weight Loss", "Gain Mass", "Improve Muscle Tone"])
 
-    if submitted:
-        plan = exercise_plan(age, height, weight, goal)
-        st.markdown(plan)
+    if st.button("Get Plan"):
+        height_cm = convert_height_to_cm(height_str)
+        if height_cm:
+            plan = get_exercise_plan(goal, age, height_cm, weight_kg)
+            st.success("✅ Here's your exercise plan:")
+            st.markdown(plan)
+        else:
+            st.error("Invalid height format. Please use format like 5'7 or 5 ft 7 in.")
