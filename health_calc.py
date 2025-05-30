@@ -79,7 +79,7 @@ def nutrition_analyzer(age, gen, height_cm, weight_kg, diet_type):
 
 # --- Exercise Planner ---
 
-def get_exercise_plan(goal, age, height_cm, weight_kg):
+def get_exercise_plan(goal, age, height_cm, weight_kg, gen):
     if goal == "Weight Loss":
         return """
         **Recommended Plan (Weight Loss):**
@@ -119,7 +119,7 @@ option = st.sidebar.selectbox(
         "Max Heart Rate Calculator",
         "Symptom Checker",
         "Nutrition Analyzer",
-        "Exercise Planner"  # <-- NEW SECTION
+        "Exercise Planner"
     ]
 )
 
@@ -172,14 +172,14 @@ elif option == "Nutrition Analyzer":
 elif option == "Exercise Planner":
     st.header("💪 Exercise Planner")
     age = st.number_input("Enter your age", min_value=1, max_value=120)
+    gen = st.radio("Select your gender", ["male", "female"])
     height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
     weight_kg = st.number_input("Enter your weight in kg", min_value=10.0, max_value=300.0)
     goal = st.selectbox("What's your fitness goal?", ["Weight Loss", "Gain Mass", "Improve Muscle Tone"])
-
     if st.button("Get Plan"):
         height_cm = convert_height_to_cm(height_str)
         if height_cm:
-            plan = get_exercise_plan(goal, age, height_cm, weight_kg)
+            plan = get_exercise_plan(goal, age, height_cm, weight_kg, gen)
             st.success("✅ Here's your exercise plan:")
             st.markdown(plan)
         else:
