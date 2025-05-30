@@ -53,36 +53,36 @@ def nutrition_analyzer(age, gen, height_cm, weight_kg, diet_type):
         st.markdown("""
         **Breakfast:**  
         - Oatmeal with almond milk, banana, and walnuts  
-        - Whole grain toast with avocado and cherry tomatoes
+        - Whole grain toast with avocado and cherry tomatoes  
         **Lunch:**  
         - Lentil soup with whole grain bread  
-        - Quinoa salad with roasted vegetables and chickpeas
+        - Quinoa salad with roasted vegetables and chickpeas  
         **Dinner:**  
         - Vegan stir-fry with tofu, vegetables, and brown rice  
-        - Grilled portobello mushrooms with quinoa
+        - Grilled portobello mushrooms with quinoa  
         """)
     elif diet_type.lower() == "non-vegan":
         st.subheader("Sample Non-Vegan Diet Plan")
         st.markdown("""
         **Breakfast:**  
         - Scrambled eggs with whole grain toast and berries  
-        - Greek yogurt with granola and honey
+        - Greek yogurt with granola and honey  
         **Lunch:**  
         - Grilled chicken with brown rice and veggies  
-        - Turkey and avocado wrap
+        - Turkey and avocado wrap  
         **Dinner:**  
         - Grilled salmon with quinoa and vegetables  
-        - Chicken stir-fry with rice
+        - Chicken stir-fry with rice  
         """)
     else:
         st.error("Invalid diet type. Please choose vegan or non-vegan.")
 
 # --- Exercise Planner ---
 
-def get_exercise_plan(goal, age, height_cm, weight_kg, gen):
+def get_exercise_plan(goal, age, height_cm, weight_kg):
     if goal == "Weight Loss":
         return """
-        **Recommended Plan (Weight Loss):**
+        **Recommended Plan (Weight Loss):**  
         - **Cardio**: 30–45 min brisk walk/jog, 5 days/week  
         - **Strength**: Light resistance training, 3 days/week  
         - **Flexibility**: Yoga/stretching, 3 days/week  
@@ -90,7 +90,7 @@ def get_exercise_plan(goal, age, height_cm, weight_kg, gen):
         """
     elif goal == "Gain Mass":
         return """
-        **Recommended Plan (Gain Mass):**
+        **Recommended Plan (Gain Mass):**  
         - **Strength**: Heavy lifting, compound exercises (4–5x/week)  
         - **Cardio**: Light, 2x/week to maintain health  
         - **Diet**: Caloric surplus, high protein  
@@ -98,7 +98,7 @@ def get_exercise_plan(goal, age, height_cm, weight_kg, gen):
         """
     elif goal == "Improve Muscle Tone":
         return """
-        **Recommended Plan (Muscle Tone):**
+        **Recommended Plan (Muscle Tone):**  
         - **Strength**: Moderate weights, high reps (4x/week)  
         - **Cardio**: HIIT 2–3x/week  
         - **Flexibility**: Foam rolling, stretching post-workout  
@@ -126,15 +126,18 @@ option = st.sidebar.selectbox(
 if option == "Ideal Body Weight Calculator":
     st.header("🏋️ Ideal Body Weight (IBW) Calculator")
     height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
-    gen = st.radio("Select your gender", ["male", "female"])
+    gen = st.radio("Select your gender", ["male", "female"], index=None)
     if st.button("Calculate IBW"):
-        height_cm = convert_height_to_cm(height_str)
-        if height_cm:
-            ibw = calculate_ibw(height_cm, gen)
-            st.success(f"Your height is: {height_cm:.2f} cm")
-            st.success(f"Ideal Body Weight: **{ibw} kg**")
+        if gen is None:
+            st.error("Please select your gender.")
         else:
-            st.error("Invalid height format.")
+            height_cm = convert_height_to_cm(height_str)
+            if height_cm:
+                ibw = calculate_ibw(height_cm, gen)
+                st.success(f"Your height is: {height_cm:.2f} cm")
+                st.success(f"Ideal Body Weight: **{ibw} kg**")
+            else:
+                st.error("Invalid height format.")
 
 elif option == "Max Heart Rate Calculator":
     st.header("❤️ Max Heart Rate (MHR) Calculator")
@@ -158,29 +161,36 @@ elif option == "Symptom Checker":
 elif option == "Nutrition Analyzer":
     st.header("🍽️ Nutrition Analyzer")
     age = st.number_input("Enter your age", min_value=1, max_value=120)
-    gen = st.radio("Select your gender", ["male", "female"])
+    gen = st.radio("Select your gender", ["male", "female"], index=None)
     height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
     weight_kg = st.number_input("Enter your weight in kg", min_value=10.0, max_value=300.0)
     diet_type = st.selectbox("Choose your diet type", ["vegan", "non-vegan"])
     if st.button("Analyze Nutrition"):
-        height_cm = convert_height_to_cm(height_str)
-        if height_cm:
-            nutrition_analyzer(age, gen, height_cm, weight_kg, diet_type)
+        if gen is None:
+            st.error("Please select your gender.")
         else:
-            st.error("Invalid height format.")
+            height_cm = convert_height_to_cm(height_str)
+            if height_cm:
+                nutrition_analyzer(age, gen, height_cm, weight_kg, diet_type)
+            else:
+                st.error("Invalid height format.")
 
 elif option == "Exercise Planner":
     st.header("💪 Exercise Planner")
     age = st.number_input("Enter your age", min_value=1, max_value=120)
-    gen = st.radio("Select your gender", ["male", "female"])
+    gen = st.radio("Select your gender", ["male", "female"], index=None)
     height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
     weight_kg = st.number_input("Enter your weight in kg", min_value=10.0, max_value=300.0)
     goal = st.selectbox("What's your fitness goal?", ["Weight Loss", "Gain Mass", "Improve Muscle Tone"])
+
     if st.button("Get Plan"):
-        height_cm = convert_height_to_cm(height_str)
-        if height_cm:
-            plan = get_exercise_plan(goal, age, height_cm, weight_kg, gen)
-            st.success("✅ Here's your exercise plan:")
-            st.markdown(plan)
+        if gen is None:
+            st.error("Please select your gender.")
         else:
-            st.error("Invalid height format. Please use format like 5'7 or 5 ft 7 in.")
+            height_cm = convert_height_to_cm(height_str)
+            if height_cm:
+                plan = get_exercise_plan(goal, age, height_cm, weight_kg)
+                st.success("✅ Here's your exercise plan:")
+                st.markdown(plan)
+            else:
+                st.error("Invalid height format. Please use format like 5'7 or 5 ft 7 in.")
