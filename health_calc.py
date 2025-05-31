@@ -12,7 +12,7 @@ tool = st.sidebar.selectbox(
     "Choose a tool", 
     ["Ideal Body Weight Calculator", "Exercise Planner", "Nutrition Analyzer", "Symptom Checker"]
 )
-
+#comment
 # Utility to convert height string to inches
 def height_to_inches(height_str):
     try:
