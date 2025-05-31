@@ -1,4 +1,6 @@
 import streamlit as st
+import requests
+import json
 
 st.set_page_config(page_title="Health Assistant App", layout="centered")
 
@@ -89,7 +91,7 @@ elif tool == "Exercise Planner":
                 plan = "Combine moderate cardio and full-body workouts 3–4x/week with a balanced diet."
             st.success("Here’s your plan:")
             st.write(plan)
-            st.session_state.exercise_score = 25  # Full score for having a plan
+            st.session_state.exercise_score = 25
 
 # Tool: Nutrition Analyzer
 elif tool == "Nutrition Analyzer":
@@ -113,12 +115,41 @@ elif tool == "Nutrition Analyzer":
             st.error("Please select a gender.")
         else:
             st.success("Nutrition analysis complete!")
-            st.write("(Note: For full functionality, integration with a real nutrition API is needed.)")
-            st.write(f"Based on what you entered, your intake might be around 1800–2200 kcal depending on portion size and exact items.")
 
-            st.session_state.nutrition_score = 25  # Full score for using analyzer
+            # Use Edamam API (you must replace with your real keys)
+            app_id = "your_edamam_app_id"
+            app_key = "your_edamam_app_key"
+            url = "https://api.edamam.com/api/nutrition-data"
 
-            with st.expander("📋 Nutrition Guide: Foods to Support Your Health"):
+            params = {
+                "app_id": app_id,
+                "app_key": app_key,
+                "ingr": food
+            }
+
+            response = requests.get(url, params=params)
+            if response.status_code == 200:
+                data = response.json()
+                calories = data.get("calories", 0)
+                total_weight = data.get("totalWeight", 0)
+                nutrients = data.get("totalNutrients", {})
+
+                st.write(f"**Calories:** {calories} kcal")
+                st.write(f"**Total Weight:** {total_weight:.2f} g")
+
+                if nutrients:
+                    st.write("### Macronutrients")
+                    for key in ["FAT", "CHOCDF", "PROCNT"]:
+                        if key in nutrients:
+                            n = nutrients[key]
+                            st.write(f"- {n['label']}: {n['quantity']:.2f} {n['unit']}")
+
+                st.session_state.nutrition_score = 25
+            else:
+                st.warning("Could not fetch data from the nutrition API. Showing placeholder estimate.")
+                st.write("Based on what you entered, your intake might be around 1800–2200 kcal depending on portion size and exact items.")
+
+            with st.expander("📌 Nutrition Guide: Foods to Support Your Health"):
                 st.subheader("🥦 Vegetables")
                 st.markdown("""
                 - **Spinach** – rich in iron, calcium, and vitamin K  
@@ -154,7 +185,7 @@ elif tool == "Nutrition Analyzer":
                 - **Flaxseeds & Chia Seeds** – high in omega-3s and fiber
                 """)
 
-                st.subheader("🌾 Whole Grains & Millets")
+                st.subheader("🍾 Whole Grains & Millets")
                 st.markdown("""
                 - **Pearl Millet** – high in iron, fiber, and protein  
                 - **Finger Millet** – rich in calcium and iron  
@@ -199,7 +230,6 @@ elif tool == "Symptom Checker":
             st.write(f"**Cause:** {cause}")
             st.write(f"**Suggested Solution:** {solution}")
 
-        # Calculate wellness score:-
         max_symptom_score = 50
         symptom_score = max_symptom_score - len(selected) * 5
         symptom_score = max(symptom_score, 0)
@@ -212,5 +242,7 @@ elif tool == "Symptom Checker":
         st.write(f"**Nutrition Score:** {st.session_state.nutrition_score}/25")
         st.write(f"**Exercise Score:** {st.session_state.exercise_score}/25")
         st.success(f"✅ Your total Wellness Score is: **{total_score}/100**")
+
+        st.info("This score combines symptoms, nutrition, and exercise data. Let us know if you'd like future versions to include sleep or mental health factors too!")
     else:
         st.info("Please select one or more symptoms to get insights.")
