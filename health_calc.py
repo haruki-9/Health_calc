@@ -51,7 +51,7 @@ if tool == "Ideal Body Weight Calculator":
 
 # Tool: Exercise Planner
 elif tool == "Exercise Planner":
-    st.header("🦾 Exercise Planner")
+    st.header("🧫 Exercise Planner")
 
     age = st.number_input("Enter your age", min_value=1, max_value=120, step=1)
 
@@ -109,9 +109,56 @@ elif tool == "Nutrition Analyzer":
             st.write("(Note: For full functionality, integration with a real nutrition API is needed.)")
             st.write(f"Based on what you entered, your intake might be around 1800–2200 kcal depending on portion size and exact items.")
 
+            with st.expander("📋 Nutrition Guide: Foods to Support Your Health"):
+                st.subheader("🥦 Vegetables")
+                st.markdown("""
+                - **Spinach** – rich in iron, calcium, and vitamin K  
+                - **Drumsticks** – excellent source of calcium, vitamin C, and iron  
+                - **Sweet Potatoes** – rich in beta-carotene and fiber  
+                - **Bottle Gourd** – hydrating and low in calories  
+                - **Carrots** – high in vitamin A and antioxidants
+                """)
+
+                st.subheader("🍎 Fruits")
+                st.markdown("""
+                - **Bananas** – rich in potassium and vitamin B6  
+                - **Guavas** – loaded with vitamin C and fiber  
+                - **Mangoes** – seasonal, rich in vitamin A and antioxidants  
+                - **Papaya** – aids digestion and rich in vitamin C  
+                - **Oranges** – great source of vitamin C
+                """)
+
+                st.subheader("🥜 Protein-Rich Foods")
+                st.markdown("""
+                - **Eggs** – contain all essential amino acids  
+                - **Lentils** – rich in protein, iron, and fiber  
+                - **Chickpeas** – great source of protein and folate  
+                - **Paneer** – high in protein and calcium  
+                - **Curd/Yogurt** – rich in probiotics and protein
+                """)
+
+                st.subheader("🐟 Healthy Fats & Proteins")
+                st.markdown("""
+                - **Fish** – high in omega-3s and protein  
+                - **Groundnuts** – good source of protein and healthy fats  
+                - **Almonds & Walnuts** – rich in omega-3s and magnesium  
+                - **Flaxseeds & Chia Seeds** – high in omega-3s and fiber
+                """)
+
+                st.subheader("🌾 Whole Grains & Millets")
+                st.markdown("""
+                - **Pearl Millet** – high in iron, fiber, and protein  
+                - **Finger Millet** – rich in calcium and iron  
+                - **Foxtail Millet** – low glycemic index and high fiber  
+                - **Quinoa** – complete protein and rich in magnesium  
+                - **Oats** – good source of fiber and iron  
+                - **Brown Rice** – high in B vitamins and fiber  
+                - **Whole Wheat** – staple source of complex carbs
+                """)
+
 # Tool: Symptom Checker
 elif tool == "Symptom Checker":
-    st.header("🤒 Symptom Checker")
+    st.header("🤔 Symptom Checker")
 
     symptoms = [
         "headache", "fatigue", "cold", "fever", "vomiting",
