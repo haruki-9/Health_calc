@@ -62,7 +62,7 @@ if tool == "Ideal Body Weight Calculator":
 
 # Tool: Exercise Planner
 elif tool == "Exercise Planner":
-    st.header("🧫 Exercise Planner")
+    st.header("🧘 Exercise Planner")
 
     age = st.number_input("Enter your age", min_value=1, max_value=120, step=1)
 
@@ -76,7 +76,7 @@ elif tool == "Exercise Planner":
     height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
     weight = st.number_input("Enter your weight in kg", min_value=10.0, max_value=300.0, step=0.1)
 
-    goal = st.selectbox("What's your fitness goal?", ["Weight Loss", "Muscle Gain", "General Fitness"])
+    goal = st.selectbox("What's your fitness goal?", ["Weight Loss", "Muscle Gain", "General Fitness", "Flexibility & Stress Relief"])
 
     if st.button("Get Plan"):
         height_in = height_to_inches(height_str)
@@ -85,16 +85,46 @@ elif tool == "Exercise Planner":
         elif gen is None:
             st.error("Please select a gender.")
         else:
-            plan = ""
+            st.success("Here’s your recommended fitness plan:")
+
             if goal == "Weight Loss":
-                plan = "Focus on cardio (30–45 min/day), light strength training 2–3x/week, and a calorie deficit."
+                st.markdown("""
+                - **Cardio:** 5 days/week (brisk walking, cycling, jogging, dance, or jump rope) – 30 to 45 minutes/session  
+                - **Strength Training:** 2–3 days/week using bodyweight or light dumbbells  
+                - **Diet Tip:** Stay in calorie deficit. Prioritize whole foods, avoid processed snacks.  
+                - **Recovery:** 7–8 hours sleep, hydration (2.5–3 L/day), and one rest day per week  
+                - **Sample Local Activities:** Early morning walk in park, skipping at home, yoga
+                """)
+
             elif goal == "Muscle Gain":
-                plan = "Strength training 4–5x/week with progressive overload, eat protein-rich meals."
-            else:
-                plan = "Combine moderate cardio and full-body workouts 3–4x/week with a balanced diet."
-            st.success("Here’s your plan:")
-            st.write(plan)
+                st.markdown("""
+                - **Strength Training:** 4–5 days/week – compound lifts (squats, pushups, lunges, rows)  
+                - **Protein Intake:** Include dal, paneer, eggs, chicken, sprouts, and nuts in meals  
+                - **Rest & Recovery:** Sleep 8 hrs/night, rest 1–2 days/week  
+                - **Cardio:** Keep light (2x/week) to maintain endurance  
+                - **Sample Local Activities:** Gym workouts, resistance bands at home, push-ups and pull-ups
+                """)
+
+            elif goal == "General Fitness":
+                st.markdown("""
+                - **Routine Mix:** Cardio + strength + flexibility (3–4x/week)  
+                - **Examples:** Morning walk, 20-min yoga, bodyweight circuit at home  
+                - **Weekend Activity:** Long walk, swimming, or playing a sport  
+                - **Focus:** Balanced routine that supports long-term energy and mood  
+                - **Diet:** Balanced plate with whole grains, local veggies, pulses, and fruits
+                """)
+
+            elif goal == "Flexibility & Stress Relief":
+                st.markdown("""
+                - **Primary Focus:** Yoga, deep stretching, and mindful breathing – 4–5x/week  
+                - **Activities:** Surya Namaskar, Pranayama, Yin Yoga  
+                - **Timing:** Ideal in morning or post-workout evenings  
+                - **Supplemental:** Light walking and music meditation  
+                - **Mental Health Tip:** Try journaling or gratitude practice alongside exercise
+                """)
+
             st.session_state.exercise_score = 25
+
 
 # Tool: Nutrition Analyzer
 elif tool == "Nutrition Analyzer":
@@ -131,30 +161,30 @@ elif tool == "Nutrition Analyzer":
             if diet_type == "non-vegan":
                 st.markdown("""
                 **Breakfast:**
-                - Scrambled eggs with whole grain toast and mixed berries  
-                - Greek yogurt with granola and honey
+                - Boiled eggs with whole wheat toast and a glass of milk   
+                - Paneer bhurji with multigrain roti
 
                 **Lunch:**
-                - Grilled chicken breast with brown rice and mixed vegetables  
-                - Turkey and avocado wrap with mixed greens
+                - Grilled chicken curry with brown rice and cucumber raita 
+                - Vegetable khichdi with curd and salad
 
                 **Dinner:**
-                - Grilled salmon with roasted vegetables and quinoa  
-                - Chicken stir-fry with mixed vegetables and brown rice
+                - Fish curry (made with coconut milk and spices) served with red rice or multigrain roti
+                - Boiled eggs and steamed vegetables seasoned with spices for flavor
                 """)
             else:
                 st.markdown("""
                 **Breakfast:**
-                - Oatmeal with almond milk, chia seeds, and banana  
-                - Peanut butter on whole wheat toast with a fruit smoothie
+                - Poha with vegetables and peanuts  
+                - Ragi porridge with jaggery and banana 
 
                 **Lunch:**
-                - Chickpea curry with brown rice and spinach  
-                - Tofu and veggie stir-fry with quinoa
+                - Mixed vegetable sambar with brown/red rice
+                - Rajma (kidney beans) curry with multigrain roti and cucumber salad
 
                 **Dinner:**
-                - Lentil soup with multigrain bread and salad  
-                - Grilled vegetables with millet and hummus
+                - Moong dal khichdi with carrot and beans, served with curd (plant-based if preferred) 
+                - Millet upma with seasonal vegetables and coconut chutney
                 """)
 
             st.session_state.nutrition_score = 25
