@@ -1,6 +1,8 @@
 import streamlit as st
 import requests
 import json
+import matplotlib.pyplot as plt
+import numpy as np
 
 st.set_page_config(page_title="Health Assistant App", layout="centered")
 
@@ -10,9 +12,15 @@ st.write("Welcome! Choose a tool from the sidebar.")
 # Sidebar options
 tool = st.sidebar.selectbox(
     "Choose a tool", 
-    ["Ideal Body Weight Calculator", "Exercise Planner", "Nutrition Analyzer", "Symptom Checker"]
+    [
+        "Ideal Body Weight Calculator",
+        "Exercise Planner",
+        "Nutrition Analyzer",
+        "Symptom Checker",
+        "📊 Health Charts"
+    ]
 )
-#comment
+
 # Utility to convert height string to inches
 def height_to_inches(height_str):
     try:
@@ -63,7 +71,6 @@ if tool == "Ideal Body Weight Calculator":
 # Tool: Exercise Planner
 elif tool == "Exercise Planner":
     st.header("🧘 Exercise Planner")
-
     age = st.number_input("Enter your age", min_value=1, max_value=120, step=1)
 
     gen = st.selectbox(
@@ -89,42 +96,32 @@ elif tool == "Exercise Planner":
 
             if goal == "Weight Loss":
                 st.markdown("""
-                - **Cardio:** 5 days/week (brisk walking, cycling, jogging, dance, or jump rope) – 30 to 45 minutes/session  
-                - **Strength Training:** 2–3 days/week using bodyweight or light dumbbells  
-                - **Diet Tip:** Stay in calorie deficit. Prioritize whole foods, avoid processed snacks.  
-                - **Recovery:** 7–8 hours sleep, hydration (2.5–3 L/day), and one rest day per week  
-                - **Sample Local Activities:** Early morning walk in park, skipping at home, yoga
+                - **Cardio:** 5 days/week – 30 to 45 minutes/session  
+                - **Strength Training:** 2–3 days/week  
+                - **Diet Tip:** Stay in calorie deficit.  
+                - **Recovery:** 7–8 hours sleep, hydration (2.5–3 L/day)  
                 """)
-
             elif goal == "Muscle Gain":
                 st.markdown("""
-                - **Strength Training:** 4–5 days/week – compound lifts (squats, pushups, lunges, rows)  
-                - **Protein Intake:** Include dal, paneer, eggs, chicken, sprouts, and nuts in meals  
-                - **Rest & Recovery:** Sleep 8 hrs/night, rest 1–2 days/week  
-                - **Cardio:** Keep light (2x/week) to maintain endurance  
-                - **Sample Local Activities:** Gym workouts, resistance bands at home, push-ups and pull-ups
+                - **Strength Training:** 4–5 days/week  
+                - **Protein Intake:** Include dal, paneer, eggs, chicken, sprouts  
+                - **Rest & Recovery:** Sleep 8 hrs/night  
+                - **Cardio:** Light cardio 2x/week  
                 """)
-
             elif goal == "General Fitness":
                 st.markdown("""
                 - **Routine Mix:** Cardio + strength + flexibility (3–4x/week)  
-                - **Examples:** Morning walk, 20-min yoga, bodyweight circuit at home  
-                - **Weekend Activity:** Long walk, swimming, or playing a sport  
-                - **Focus:** Balanced routine that supports long-term energy and mood  
-                - **Diet:** Balanced plate with whole grains, local veggies, pulses, and fruits
+                - **Examples:** Walking, yoga, home circuits  
+                - **Diet:** Whole grains, local veggies, pulses  
                 """)
-
             elif goal == "Flexibility & Stress Relief":
                 st.markdown("""
-                - **Primary Focus:** Yoga, deep stretching, and mindful breathing – 4–5x/week  
-                - **Activities:** Surya Namaskar, Pranayama, Yin Yoga  
-                - **Timing:** Ideal in morning or post-workout evenings  
-                - **Supplemental:** Light walking and music meditation  
-                - **Mental Health Tip:** Try journaling or gratitude practice alongside exercise
+                - **Yoga & Stretching:** 4–5x/week  
+                - **Breathing & Meditation:** Daily  
+                - **Supplemental:** Walks, music meditation  
                 """)
 
             st.session_state.exercise_score = 25
-
 
 # Tool: Nutrition Analyzer
 elif tool == "Nutrition Analyzer":
@@ -132,11 +129,7 @@ elif tool == "Nutrition Analyzer":
     st.write("This tool estimates your caloric needs and offers a basic diet plan.")
 
     age = st.number_input("Enter your age", min_value=1, max_value=120, step=1)
-
-    gen = st.selectbox(
-        "Select your gender",
-        options=["-- Select --", "male", "female"]
-    )
+    gen = st.selectbox("Select your gender", options=["-- Select --", "male", "female"])
     if gen == "-- Select --":
         gen = None
 
@@ -160,31 +153,15 @@ elif tool == "Nutrition Analyzer":
 
             if diet_type == "non-vegan":
                 st.markdown("""
-                **Breakfast:**
-                - Boiled eggs with whole wheat toast and a glass of milk   
-                - Paneer bhurji with multigrain roti
-
-                **Lunch:**
-                - Grilled chicken curry with brown rice and cucumber raita 
-                - Vegetable khichdi with curd and salad
-
-                **Dinner:**
-                - Fish curry (made with coconut milk and spices) served with red rice or multigrain roti
-                - Boiled eggs and steamed vegetables seasoned with spices for flavor
+                **Breakfast:** Eggs, toast, milk / Paneer bhurji
+                **Lunch:** Chicken curry, rice / Khichdi with curd
+                **Dinner:** Fish curry / Eggs + vegetables
                 """)
             else:
                 st.markdown("""
-                **Breakfast:**
-                - Poha with vegetables and peanuts  
-                - Ragi porridge with jaggery and banana 
-
-                **Lunch:**
-                - Mixed vegetable sambar with brown/red rice
-                - Rajma (kidney beans) curry with multigrain roti and cucumber salad
-
-                **Dinner:**
-                - Moong dal khichdi with carrot and beans, served with curd (plant-based if preferred) 
-                - Millet upma with seasonal vegetables and coconut chutney
+                **Breakfast:** Poha, ragi porridge
+                **Lunch:** Sambar with rice / Rajma with roti
+                **Dinner:** Moong dal khichdi / Millet upma
                 """)
 
             st.session_state.nutrition_score = 25
@@ -192,41 +169,33 @@ elif tool == "Nutrition Analyzer":
 # Tool: Symptom Checker
 elif tool == "Symptom Checker":
     st.header("🤔 Symptom Checker")
-
-    symptoms = [
-        "headache", "fatigue", "cold", "fever", "vomiting",
-        "dizziness", "dehydration", "diarrhea", "sunburn",
-        "heat rash", "muscle cramps", "nausea", "sore throat"
-    ]
+    symptoms = ["headache", "fatigue", "cold", "fever", "vomiting", "dizziness", "dehydration", "diarrhea", "sunburn", "heat rash", "muscle cramps", "nausea", "sore throat"]
 
     symptom_info = {
-        "headache": ("Dehydration, stress, or screen fatigue", "Drink water, rest, reduce screen time."),
-        "fatigue": ("Lack of sleep, anemia, or poor diet", "Get proper rest, eat iron-rich foods."),
-        "cold": ("Viral infection or allergies", "Stay warm, take rest and drink fluids."),
-        "fever": ("Infection or inflammation", "Use paracetamol, see doctor if persists."),
-        "vomiting": ("Food poisoning or heat-related illness", "Use ORS, avoid solid food temporarily."),
-        "dizziness": ("Low BP or dehydration", "Sit down, drink fluids."),
-        "dehydration": ("Inadequate fluid intake", "Drink ORS and rest in cool place."),
-        "diarrhea": ("Infection or contaminated food/water", "Hydrate with ORS, avoid oily food."),
-        "sunburn": ("UV exposure", "Use aloe vera or cool compress."),
-        "heat rash": ("Sweat gland blockage", "Keep area cool and dry."),
-        "muscle cramps": ("Electrolyte imbalance or overuse", "Stretch and drink coconut water."),
-        "nausea": ("Indigestion or heat stress", "Rest and sip fluids."),
-        "sore throat": ("Viral infection or allergies", "Gargle with salt water, drink warm fluids.")
+        "headache": ("Dehydration, stress", "Drink water, rest."),
+        "fatigue": ("Lack of sleep", "Get proper rest."),
+        "cold": ("Viral", "Take rest, drink fluids."),
+        "fever": ("Infection", "Use paracetamol."),
+        "vomiting": ("Food poisoning", "Use ORS, avoid solid food."),
+        "dizziness": ("Low BP", "Sit down, drink fluids."),
+        "dehydration": ("Low fluids", "Drink ORS."),
+        "diarrhea": ("Contaminated food", "Hydrate."),
+        "sunburn": ("UV exposure", "Use aloe vera."),
+        "heat rash": ("Sweat glands", "Keep cool."),
+        "muscle cramps": ("Overuse", "Stretch, hydrate."),
+        "nausea": ("Indigestion", "Rest, sip fluids."),
+        "sore throat": ("Infection", "Gargle, warm fluids.")
     }
 
-    selected = st.multiselect("Select symptoms you are experiencing", symptoms)
+    selected = st.multiselect("Select symptoms", symptoms)
     if selected:
         for sym in selected:
             cause, solution = symptom_info.get(sym, ("Unknown", "Consult a doctor."))
             st.subheader(sym.capitalize())
             st.write(f"**Cause:** {cause}")
-            st.write(f"**Suggested Solution:** {solution}")
+            st.write(f"**Solution:** {solution}")
 
-        max_symptom_score = 50
-        symptom_score = max_symptom_score - len(selected) * 5
-        symptom_score = max(symptom_score, 0)
-
+        symptom_score = max(50 - len(selected) * 5, 0)
         total_score = symptom_score + st.session_state.nutrition_score + st.session_state.exercise_score
 
         st.markdown("---")
@@ -234,8 +203,38 @@ elif tool == "Symptom Checker":
         st.write(f"**Symptom Score:** {symptom_score}/50")
         st.write(f"**Nutrition Score:** {st.session_state.nutrition_score}/25")
         st.write(f"**Exercise Score:** {st.session_state.exercise_score}/25")
-        st.success(f"✅ Your total Wellness Score is: **{total_score}/100**")
+        st.success(f"✅ Total Score: {total_score}/100")
 
-        st.info("This score combines symptoms, nutrition, and exercise data. Let us know if you'd like future versions to include sleep or mental health factors too!")
-    else:
-        st.info("Please select one or more symptoms to get insights.")
+# Tool: Health Charts
+elif tool == "📊 Health Charts":
+    st.header("📊 Health Visualization")
+    st.write("Here you can visualize your health progress across symptoms, nutrition, and exercise. This helps make your overall wellness status more clear and easy to understand.")
+
+    labels = ['Symptoms', 'Nutrition', 'Exercise']
+    scores = [
+        max(0, 50 - len(st.session_state.get('symptoms', [])) * 5) if 'symptoms' in st.session_state else 50,
+        st.session_state.nutrition_score,
+        st.session_state.exercise_score
+    ]
+
+    # Pie Chart
+    st.subheader("🍰 Pie Chart")
+    fig1, ax1 = plt.subplots()
+    ax1.pie(scores, labels=labels, autopct='%1.1f%%', startangle=90)
+    ax1.axis('equal')
+    st.pyplot(fig1)
+
+    # Radar Chart
+    st.subheader("🤯 Radar Chart")
+    fig2 = plt.figure()
+    angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False).tolist()
+    scores += scores[:1]  # Close the loop
+    angles += angles[:1]
+
+    ax2 = fig2.add_subplot(111, polar=True)
+    ax2.plot(angles, scores, 'o-', linewidth=2)
+    ax2.fill(angles, scores, alpha=0.25)
+    ax2.set_thetagrids(np.degrees(angles[:-1]), labels)
+    ax2.set_title("Wellness Radar Chart")
+    ax2.grid(True)
+    st.pyplot(fig2)
