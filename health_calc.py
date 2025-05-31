@@ -218,14 +218,14 @@ elif tool == "📊 Health Charts":
     ]
 
     # Pie Chart
-    st.subheader("🍰 Pie Chart")
+    st.subheader("🟠 Pie Chart")
     fig1, ax1 = plt.subplots()
     ax1.pie(scores, labels=labels, autopct='%1.1f%%', startangle=90)
     ax1.axis('equal')
     st.pyplot(fig1)
 
     # Radar Chart
-    st.subheader("🤯 Radar Chart")
+    st.subheader("🕸️ Radar Chart")
     fig2 = plt.figure()
     angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False).tolist()
     scores += scores[:1]  # Close the loop
