@@ -13,7 +13,7 @@ def height_to_inches(height_str):
     try:
         if "'" in height_str:
             feet, inches = height_str.split("'")
-            inches = inches.replace('\"', '').strip()
+            inches = inches.replace('"', '').strip()
             return int(feet) * 12 + int(inches)
         elif "ft" in height_str:
             parts = height_str.lower().replace("in", "").split("ft")
@@ -22,6 +22,12 @@ def height_to_inches(height_str):
             return feet * 12 + inches
     except:
         return None
+
+# Initialize wellness score components
+if 'nutrition_score' not in st.session_state:
+    st.session_state.nutrition_score = 0
+if 'exercise_score' not in st.session_state:
+    st.session_state.exercise_score = 0
 
 # Tool: Ideal Body Weight Calculator
 if tool == "Ideal Body Weight Calculator":
@@ -83,6 +89,7 @@ elif tool == "Exercise Planner":
                 plan = "Combine moderate cardio and full-body workouts 3–4x/week with a balanced diet."
             st.success("Here’s your plan:")
             st.write(plan)
+            st.session_state.exercise_score = 25  # Full score for having a plan
 
 # Tool: Nutrition Analyzer
 elif tool == "Nutrition Analyzer":
@@ -108,6 +115,8 @@ elif tool == "Nutrition Analyzer":
             st.success("Nutrition analysis complete!")
             st.write("(Note: For full functionality, integration with a real nutrition API is needed.)")
             st.write(f"Based on what you entered, your intake might be around 1800–2200 kcal depending on portion size and exact items.")
+
+            st.session_state.nutrition_score = 25  # Full score for using analyzer
 
             with st.expander("📋 Nutrition Guide: Foods to Support Your Health"):
                 st.subheader("🥦 Vegetables")
@@ -189,5 +198,19 @@ elif tool == "Symptom Checker":
             st.subheader(sym.capitalize())
             st.write(f"**Cause:** {cause}")
             st.write(f"**Suggested Solution:** {solution}")
+
+        # Calculate wellness score
+        max_symptom_score = 50
+        symptom_score = max_symptom_score - len(selected) * 5
+        symptom_score = max(symptom_score, 0)
+
+        total_score = symptom_score + st.session_state.nutrition_score + st.session_state.exercise_score
+
+        st.markdown("---")
+        st.header("🌟 Your Overall Wellness Score")
+        st.write(f"**Symptom Score:** {symptom_score}/50")
+        st.write(f"**Nutrition Score:** {st.session_state.nutrition_score}/25")
+        st.write(f"**Exercise Score:** {st.session_state.exercise_score}/25")
+        st.success(f"✅ Your total Wellness Score is: **{total_score}/100**")
     else:
         st.info("Please select one or more symptoms to get insights.")
