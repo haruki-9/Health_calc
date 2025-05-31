@@ -1,4 +1,5 @@
 import streamlit as st
+import re
 import requests
 import json
 import matplotlib.pyplot as plt
@@ -36,6 +37,25 @@ def height_to_inches(height_str):
     except:
         return None
 
+# Utility to convert height to cm
+def convert_height_to_cm(height_str):
+    feet = 0
+    inches = 0
+    match1 = re.match(r"(\d+)'(\d+)", height_str)
+    match2 = re.match(r"(\d+)\s*ft\s*(\d*)\s*in*", height_str)
+
+    if match1:
+        feet = int(match1.group(1))
+        inches = int(match1.group(2))
+    elif match2:
+        feet = int(match2.group(1))
+        inches = int(match2.group(2)) if match2.group(2) else 0
+    else:
+        return None
+
+    total_inches = feet * 12 + inches
+    return round(total_inches * 2.54, 2)
+
 # Initialize scores
 if 'nutrition_score' not in st.session_state:
     st.session_state.nutrition_score = 0
@@ -47,10 +67,7 @@ if tool == "Ideal Body Weight Calculator":
     st.header("🏋️ Ideal Body Weight (IBW) Calculator")
     height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
 
-    gen = st.selectbox(
-        "Select your gender",
-        options=["-- Select --", "male", "female"]
-    )
+    gen = st.selectbox("Select your gender", options=["-- Select --", "male", "female"])
     if gen == "-- Select --":
         gen = None
 
@@ -72,17 +89,12 @@ if tool == "Ideal Body Weight Calculator":
 elif tool == "Exercise Planner":
     st.header("🧘 Exercise Planner")
     age = st.number_input("Enter your age", min_value=1, max_value=120, step=1)
-
-    gen = st.selectbox(
-        "Select your gender",
-        options=["-- Select --", "male", "female"]
-    )
+    gen = st.selectbox("Select your gender", options=["-- Select --", "male", "female"])
     if gen == "-- Select --":
         gen = None
 
     height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
     weight = st.number_input("Enter your weight in kg", min_value=10.0, max_value=300.0, step=0.1)
-
     goal = st.selectbox("What's your fitness goal?", ["Weight Loss", "Muscle Gain", "General Fitness", "Flexibility & Stress Relief"])
 
     if st.button("Get Plan"):
@@ -93,7 +105,6 @@ elif tool == "Exercise Planner":
             st.error("Please select a gender.")
         else:
             st.success("Here’s your recommended fitness plan:")
-
             if goal == "Weight Loss":
                 st.markdown("""
                 - **Cardio:** 5 days/week – 30 to 45 minutes/session  
@@ -123,48 +134,64 @@ elif tool == "Exercise Planner":
 
             st.session_state.exercise_score = 25
 
-# Tool: Nutrition Analyzer
+# Tool: Nutrition Analyzer (updated)
 elif tool == "Nutrition Analyzer":
     st.header("🍽️ Nutrition Analyzer")
-    st.write("This tool estimates your caloric needs and offers a basic diet plan.")
+    st.write("This tool estimates your daily caloric needs and suggests a South Indian-style diet plan.")
 
     age = st.number_input("Enter your age", min_value=1, max_value=120, step=1)
     gen = st.selectbox("Select your gender", options=["-- Select --", "male", "female"])
-    if gen == "-- Select --":
-        gen = None
-
     height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
     weight = st.number_input("Enter your weight in kg", min_value=10.0, max_value=300.0, step=0.1)
-
     diet_type = st.radio("Are you vegan or non-vegan?", ["non-vegan", "vegan"])
 
     if st.button("Analyze Diet Plan"):
-        if gen is None:
+        if gen == "-- Select --":
             st.error("Please select a gender.")
         elif not height_str:
             st.error("Please enter your height.")
         else:
-            st.success("Nutrition analysis complete!")
-
-            caloric_needs = 2500 if gen == "male" else 2000
-            st.write(f"Your daily caloric needs are approximately {caloric_needs} calories.")
-
-            st.subheader(f"Here's a sample {diet_type} diet plan for you:")
-
-            if diet_type == "non-vegan":
-                st.markdown("""
-                **Breakfast:** Eggs, toast, milk / Paneer bhurji
-                **Lunch:** Chicken curry, rice / Khichdi with curd
-                **Dinner:** Fish curry / Eggs + vegetables
-                """)
+            height_cm = convert_height_to_cm(height_str)
+            if height_cm is None:
+                st.error("Invalid height format. Please use formats like 5'7 or 5 ft 7 in.")
             else:
-                st.markdown("""
-                **Breakfast:** Poha, ragi porridge
-                **Lunch:** Sambar with rice / Rajma with roti
-                **Dinner:** Moong dal khichdi / Millet upma
-                """)
+                if gen == "male":
+                    bmr = 10 * weight + 6.25 * height_cm - 5 * age + 5
+                else:
+                    bmr = 10 * weight + 6.25 * height_cm - 5 * age - 161
 
-            st.session_state.nutrition_score = 25
+                caloric_needs = int(bmr * 1.2)
+                st.success("Nutrition analysis complete!")
+                st.write(f"Your estimated daily caloric need is **{caloric_needs} calories**.")
+
+                st.subheader(f"Here's a sample {diet_type} South Indian-style diet plan:")
+
+                if diet_type == "non-vegan":
+                    st.markdown("""
+                    - **Breakfast:**  
+                      - Boiled egg with poha  
+                      - Banana with milk  
+                    - **Lunch:**  
+                      - Fish gravy with roti/rice  
+                      - Chicken curry with chapati  
+                    - **Dinner:**  
+                      - Fish fry with chapati/pulka  
+                      - Egg masala with jowar roti  
+                    """)
+                else:
+                    st.markdown("""
+                    - **Breakfast:**  
+                      - Millet dosa with coconut chutney  
+                      - Steamed vegetables with toasted paneer  
+                    - **Lunch:**  
+                      - Roti with lettuce, paneer, and mushroom curry  
+                      - Brown rice with mixed dal curry  
+                    - **Dinner:**  
+                      - Steamed vegetables and steamed nuts  
+                      - Salad with channa, rajma, and sprouts  
+                    """)
+
+                st.session_state.nutrition_score = 25
 
 # Tool: Symptom Checker
 elif tool == "Symptom Checker":
@@ -208,7 +235,7 @@ elif tool == "Symptom Checker":
 # Tool: Health Charts
 elif tool == "📊 Health Charts":
     st.header("📊 Health Visualization")
-    st.write("Here you can visualize your health progress across symptoms, nutrition, and exercise. This helps make your overall wellness status more clear and easy to understand.")
+    st.write("Here you can visualize your health progress across symptoms, nutrition, and exercise.")
 
     labels = ['Symptoms', 'Nutrition', 'Exercise']
     scores = [
@@ -228,7 +255,7 @@ elif tool == "📊 Health Charts":
     st.subheader("🕸️ Radar Chart")
     fig2 = plt.figure()
     angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False).tolist()
-    scores += scores[:1]  # Close the loop
+    scores += scores[:1]
     angles += angles[:1]
 
     ax2 = fig2.add_subplot(111, polar=True)
