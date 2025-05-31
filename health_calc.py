@@ -199,7 +199,7 @@ elif tool == "Symptom Checker":
             st.write(f"**Cause:** {cause}")
             st.write(f"**Suggested Solution:** {solution}")
 
-        # Calculate wellness score
+        # Calculate wellness score:-
         max_symptom_score = 50
         symptom_score = max_symptom_score - len(selected) * 5
         symptom_score = max(symptom_score, 0)
