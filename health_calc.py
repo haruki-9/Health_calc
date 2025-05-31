@@ -3,7 +3,6 @@ import requests
 import json
 
 st.set_page_config(page_title="Health Assistant App", layout="centered")
-
 st.title("💪 Health Assistant App")
 st.write("Welcome! Choose a tool from the sidebar.")
 
@@ -35,14 +34,12 @@ if 'exercise_score' not in st.session_state:
 if tool == "Ideal Body Weight Calculator":
     st.header("🏋️ Ideal Body Weight (IBW) Calculator")
     height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
-
     gen = st.selectbox(
         "Select your gender",
         options=["-- Select --", "male", "female"]
     )
     if gen == "-- Select --":
         gen = None
-
     if st.button("Calculate IBW"):
         height_in = height_to_inches(height_str)
         if height_in is None:
@@ -57,24 +54,20 @@ if tool == "Ideal Body Weight Calculator":
                 ibw = 45.5 + 2.3 * (height_in - base_height) if height_in > base_height else 45.5
             st.success(f"Your Ideal Body Weight is approximately {ibw:.2f} kg")
 
+
 # Tool: Exercise Planner
 elif tool == "Exercise Planner":
     st.header("🧫 Exercise Planner")
-
     age = st.number_input("Enter your age", min_value=1, max_value=120, step=1)
-
     gen = st.selectbox(
         "Select your gender",
         options=["-- Select --", "male", "female"]
     )
     if gen == "-- Select --":
         gen = None
-
     height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
     weight = st.number_input("Enter your weight in kg", min_value=10.0, max_value=300.0, step=0.1)
-
     goal = st.selectbox("What's your fitness goal?", ["Weight Loss", "Muscle Gain", "General Fitness"])
-
     if st.button("Get Plan"):
         height_in = height_to_inches(height_str)
         if height_in is None:
@@ -96,116 +89,61 @@ elif tool == "Exercise Planner":
 # Tool: Nutrition Analyzer
 elif tool == "Nutrition Analyzer":
     st.header("🥗 Nutrition Analyzer")
-
-    food = st.text_area("Enter the food items you ate today (e.g., 2 eggs, 1 cup rice, 1 apple)")
-
+    age = st.number_input("Enter your age", min_value=1, max_value=120, step=1)
     gen = st.selectbox(
         "Select your gender",
         options=["-- Select --", "male", "female"]
     )
     if gen == "-- Select --":
         gen = None
+    height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
+    weight = st.number_input("Enter your weight in kg", min_value=10.0, max_value=300.0, step=0.1)
+    diet_type = st.selectbox("Select your diet type", ["vegan", "non-vegan"])
 
-    age = st.number_input("Enter your age", min_value=1, max_value=120, step=1)
-
-    if st.button("Analyze"):
-        if not food:
-            st.error("Please enter food details.")
+    if st.button("Analyze Diet Plan"):
+        height_in = height_to_inches(height_str)
+        if height_in is None:
+            st.error("Please enter a valid height.")
         elif gen is None:
             st.error("Please select a gender.")
         else:
             st.success("Nutrition analysis complete!")
-
-            # Use Edamam API (you must replace with your real keys)
-            app_id = "your_edamam_app_id"
-            app_key = "your_edamam_app_key"
-            url = "https://api.edamam.com/api/nutrition-data"
-
-            params = {
-                "app_id": app_id,
-                "app_key": app_key,
-                "ingr": food
-            }
-
-            response = requests.get(url, params=params)
-            if response.status_code == 200:
-                data = response.json()
-                calories = data.get("calories", 0)
-                total_weight = data.get("totalWeight", 0)
-                nutrients = data.get("totalNutrients", {})
-
-                st.write(f"**Calories:** {calories} kcal")
-                st.write(f"**Total Weight:** {total_weight:.2f} g")
-
-                if nutrients:
-                    st.write("### Macronutrients")
-                    for key in ["FAT", "CHOCDF", "PROCNT"]:
-                        if key in nutrients:
-                            n = nutrients[key]
-                            st.write(f"- {n['label']}: {n['quantity']:.2f} {n['unit']}")
-
-                st.session_state.nutrition_score = 25
+            caloric_needs = 2500 if gen == "male" else 2000
+            st.write(f"Your daily caloric needs are approximately {caloric_needs} calories.")
+            st.subheader(f"Here's a sample {diet_type} diet plan for you:")
+            if diet_type == "non-vegan":
+                st.markdown("""
+                **Breakfast:**
+                - Scrambled eggs with whole grain toast and mixed berries
+                - Greek yogurt with granola and honey
+                **Lunch:**
+                - Grilled chicken breast with brown rice and mixed vegetables
+                - Turkey and avocado wrap with mixed greens
+                **Dinner:**
+                - Grilled salmon with roasted vegetables and quinoa
+                - Chicken stir-fry with mixed vegetables and brown rice
+                """)
             else:
-                st.warning("Could not fetch data from the nutrition API. Showing placeholder estimate.")
-                st.write("Based on what you entered, your intake might be around 1800–2200 kcal depending on portion size and exact items.")
-
-            with st.expander("📌 Nutrition Guide: Foods to Support Your Health"):
-                st.subheader("🥦 Vegetables")
                 st.markdown("""
-                - **Spinach** – rich in iron, calcium, and vitamin K  
-                - **Drumsticks** – excellent source of calcium, vitamin C, and iron  
-                - **Sweet Potatoes** – rich in beta-carotene and fiber  
-                - **Bottle Gourd** – hydrating and low in calories  
-                - **Carrots** – high in vitamin A and antioxidants
+                **Breakfast:**
+                - Oatmeal with almond milk, chia seeds, and banana
+                - Peanut butter on whole wheat toast with a fruit smoothie
+                **Lunch:**
+                - Chickpea curry with brown rice and spinach
+                - Tofu and veggie stir-fry with quinoa
+                **Dinner:**
+                - Lentil soup with multigrain bread and salad
+                - Grilled vegetables with millet and hummus
                 """)
-
-                st.subheader("🍎 Fruits")
-                st.markdown("""
-                - **Bananas** – rich in potassium and vitamin B6  
-                - **Guavas** – loaded with vitamin C and fiber  
-                - **Mangoes** – seasonal, rich in vitamin A and antioxidants  
-                - **Papaya** – aids digestion and rich in vitamin C  
-                - **Oranges** – great source of vitamin C
-                """)
-
-                st.subheader("🥜 Protein-Rich Foods")
-                st.markdown("""
-                - **Eggs** – contain all essential amino acids  
-                - **Lentils** – rich in protein, iron, and fiber  
-                - **Chickpeas** – great source of protein and folate  
-                - **Paneer** – high in protein and calcium  
-                - **Curd/Yogurt** – rich in probiotics and protein
-                """)
-
-                st.subheader("🐟 Healthy Fats & Proteins")
-                st.markdown("""
-                - **Fish** – high in omega-3s and protein  
-                - **Groundnuts** – good source of protein and healthy fats  
-                - **Almonds & Walnuts** – rich in omega-3s and magnesium  
-                - **Flaxseeds & Chia Seeds** – high in omega-3s and fiber
-                """)
-
-                st.subheader("🍾 Whole Grains & Millets")
-                st.markdown("""
-                - **Pearl Millet** – high in iron, fiber, and protein  
-                - **Finger Millet** – rich in calcium and iron  
-                - **Foxtail Millet** – low glycemic index and high fiber  
-                - **Quinoa** – complete protein and rich in magnesium  
-                - **Oats** – good source of fiber and iron  
-                - **Brown Rice** – high in B vitamins and fiber  
-                - **Whole Wheat** – staple source of complex carbs
-                """)
+            st.session_state.nutrition_score = 25
 
 # Tool: Symptom Checker
 elif tool == "Symptom Checker":
     st.header("🤔 Symptom Checker")
-
     symptoms = [
-        "headache", "fatigue", "cold", "fever", "vomiting",
-        "dizziness", "dehydration", "diarrhea", "sunburn",
-        "heat rash", "muscle cramps", "nausea", "sore throat"
+        "headache", "fatigue", "cold", "fever", "vomiting", "dizziness", "dehydration",
+        "diarrhea", "sunburn", "heat rash", "muscle cramps", "nausea", "sore throat"
     ]
-
     symptom_info = {
         "headache": ("Dehydration, stress, or screen fatigue", "Drink water, rest, reduce screen time."),
         "fatigue": ("Lack of sleep, anemia, or poor diet", "Get proper rest, eat iron-rich foods."),
@@ -221,7 +159,6 @@ elif tool == "Symptom Checker":
         "nausea": ("Indigestion or heat stress", "Rest and sip fluids."),
         "sore throat": ("Viral infection or allergies", "Gargle with salt water, drink warm fluids.")
     }
-
     selected = st.multiselect("Select symptoms you are experiencing", symptoms)
     if selected:
         for sym in selected:
@@ -229,20 +166,8 @@ elif tool == "Symptom Checker":
             st.subheader(sym.capitalize())
             st.write(f"**Cause:** {cause}")
             st.write(f"**Suggested Solution:** {solution}")
-
         max_symptom_score = 50
         symptom_score = max_symptom_score - len(selected) * 5
         symptom_score = max(symptom_score, 0)
-
-        total_score = symptom_score + st.session_state.nutrition_score + st.session_state.exercise_score
-
-        st.markdown("---")
-        st.header("🌟 Your Overall Wellness Score")
-        st.write(f"**Symptom Score:** {symptom_score}/50")
-        st.write(f"**Nutrition Score:** {st.session_state.nutrition_score}/25")
-        st.write(f"**Exercise Score:** {st.session_state.exercise_score}/25")
-        st.success(f"✅ Your total Wellness Score is: **{total_score}/100**")
-
-        st.info("This score combines symptoms, nutrition, and exercise data. Let us know if you'd like future versions to include sleep or mental health factors too!")
-    else:
-        st.info("Please select one or more symptoms to get insights.")
+        total_score = symptom_score + st.session_state.exercise_score + st.session_state.nutrition_score
+        st.write(f"Your total wellness score is: {total_score}")
