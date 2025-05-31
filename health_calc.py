@@ -9,7 +9,7 @@ st.set_page_config(page_title="Health Assistant App", layout="centered")
 st.title("💪 Health Assistant App")
 st.write("Welcome! Choose a tool from the sidebar.")
 
-# Sidebar options
+# Sidebar options:-
 tool = st.sidebar.selectbox(
     "Choose a tool", 
     [
