@@ -22,7 +22,7 @@ tool = st.sidebar.selectbox(
     ]
 )
 
-# Utility to convert height string to inches
+# Utility to convert height string to inches:-
 def height_to_inches(height_str):
     try:
         if "'" in height_str:
