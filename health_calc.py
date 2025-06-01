@@ -62,13 +62,13 @@ def convert_height_to_cm(height_str):
     total_inches = feet * 12 + inches
     return round(total_inches * 2.54, 2)
 
-# Initialize scores
+# Initialize scores:
 if 'nutrition_score' not in st.session_state:
     st.session_state.nutrition_score = 0
 if 'exercise_score' not in st.session_state:
     st.session_state.exercise_score = 0
 
-# Tool: IBW
+# Tool: IBW:
 if tool == "Ideal Body Weight Calculator":
     st.header("🏋️ Ideal Body Weight (IBW) Calculator")
     height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
@@ -90,7 +90,7 @@ if tool == "Ideal Body Weight Calculator":
                 ibw = 45.5 + 2.3 * (height_in - base_height) if height_in > base_height else 45.5
             st.success(f"Your Ideal Body Weight is approximately {ibw:.2f} kg")
 
-# Tool: Exercise Planner
+# Tool: Exercise Planner:
 elif tool == "Exercise Planner":
     st.header("🧘 Exercise Planner")
     age = st.number_input("Enter your age", min_value=1, max_value=120, step=1)
@@ -140,7 +140,7 @@ elif tool == "Exercise Planner":
 
             st.session_state.exercise_score = 25
 
-# Tool: Nutrition Analyzer
+# Tool: Nutrition Analyzer:
 elif tool == "Nutrition Analyzer":
     st.header("🍽️ Nutrition Analyzer")
     st.write("This tool estimates your daily caloric needs and suggests a South Indian-style diet plan.")
