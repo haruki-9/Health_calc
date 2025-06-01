@@ -15,6 +15,7 @@ st.set_page_config(page_title="Health Assistant App", layout="centered")
 st.title("💪 Health Assistant App")
 st.write("Welcome! Choose a tool from the sidebar.")
 
+#Sidebar Options:-
 tool = st.sidebar.selectbox(
     "Choose a tool", 
     [
@@ -26,6 +27,7 @@ tool = st.sidebar.selectbox(
     ] + (["📬 View Feedback"] if st.session_state.get("is_admin") else [])
 )
 
+#Utility functions:
 def height_to_inches(height_str):
     try:
         if "'" in height_str:
@@ -56,6 +58,7 @@ def convert_height_to_cm(height_str):
     total_inches = feet * 12 + inches
     return round(total_inches * 2.54, 2)
 
+#Initialize Session State:
 if 'nutrition_score' not in st.session_state:
     st.session_state.nutrition_score = 0
 if 'exercise_score' not in st.session_state:
@@ -63,6 +66,7 @@ if 'exercise_score' not in st.session_state:
 if 'is_admin' not in st.session_state:
     st.session_state.is_admin = False
 
+#Tool:Ideal Body Weight(IBW):-
 if tool == "Ideal Body Weight Calculator":
     st.header("🏋️ Ideal Body Weight (IBW) Calculator")
     height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
@@ -80,6 +84,7 @@ if tool == "Ideal Body Weight Calculator":
             ibw = 50 + 2.3 * (height_in - base_height) if gen == "male" else 45.5 + 2.3 * (height_in - base_height)
             st.success(f"Your Ideal Body Weight is approximately {ibw:.2f} kg")
 
+#Tool:Exercise Planner:-
 elif tool == "Exercise Planner":
     st.header("🧘 Exercise Planner")
     age = st.number_input("Enter your age", min_value=1, max_value=120)
@@ -103,7 +108,7 @@ elif tool == "Exercise Planner":
             }
             st.markdown(plans[goal])
             st.session_state.exercise_score = 25
-
+#Tool:Nutrition Analyzer:-
 elif tool == "Nutrition Analyzer":
     st.header("🍽️ Nutrition Analyzer")
     age = st.number_input("Enter your age", min_value=1, max_value=120)
@@ -130,6 +135,7 @@ elif tool == "Nutrition Analyzer":
                 st.markdown(plans[diet_type])
                 st.session_state.nutrition_score = 25
 
+#Tool:Symptom Checker:-
 elif tool == "Symptom Checker":
     st.header("🤔 Symptom Checker")
     symptoms = ["headache", "fatigue", "cold", "fever", "vomiting", "dizziness", "dehydration", "diarrhea", "sunburn", "heat rash", "muscle cramps", "nausea", "sore throat"]
@@ -159,6 +165,7 @@ elif tool == "Symptom Checker":
         st.write(f"Symptom Score: {symptom_score}/50\nNutrition: {st.session_state.nutrition_score}/25\nExercise: {st.session_state.exercise_score}/25")
         st.success(f"✅ Wellness Score: {total}/100")
 
+#Tool:View Feedback:-
 elif tool == "📬 View Feedback":
     st.header("🔐 Admin Login - View Feedback")
     password = st.text_input("Enter admin password", type="password")
@@ -173,6 +180,7 @@ elif tool == "📬 View Feedback":
     elif password:
         st.error("Incorrect password.")
 
+#Tool:📊 Health Charts
 elif tool == "📊 Health Charts":
     st.header("📊 Health Overview Charts")
     pie_data = [st.session_state.exercise_score, st.session_state.nutrition_score, 100 - st.session_state.exercise_score - st.session_state.nutrition_score]
@@ -194,6 +202,7 @@ elif tool == "📊 Health Charts":
     ax2.set_title("Health Radar Chart")
     st.pyplot(fig2)
 
+#Tool:Flooting Feedback Form(Expander acts like pop-up)
 with st.expander("💬 Submit Feedback"):
     st.subheader("We'd love your feedback!")
     name = st.text_input("Your Name (optional)")
@@ -207,6 +216,7 @@ with st.expander("💬 Submit Feedback"):
             feedback_df.to_csv("user_feedback.csv", index=False)
         st.success("✅ Feedback submitted! Thank you!")
 
+#
 st.markdown("""
     <style>
         .stApp {
