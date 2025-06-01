@@ -9,7 +9,7 @@ import re
 
 # ---------- Admin Config ----------
 ADMIN_PASSWORD = "Admin160622"  # Change to a secure password
-ADMIN_USERNAME = "ADMIN"      # Your name or any username to detect for admin view
+ADMIN_USERNAME = "ADMIN"      # Your name or any username to detect for admin view for protection
 
 st.set_page_config(page_title="Health Assistant App", layout="centered")
 
