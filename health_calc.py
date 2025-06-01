@@ -1,18 +1,21 @@
 import streamlit as st
-import re
 import requests
 import json
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import os
+import re
+
+# ---------- Admin Config ----------
+ADMIN_PASSWORD = "Admin160622"  # Change this to a secure password
 
 st.set_page_config(page_title="Health Assistant App", layout="centered")
 
 st.title("💪 Health Assistant App")
 st.write("Welcome! Choose a tool from the sidebar.")
 
-# Sidebar options
+# Sidebar options:-
 tool = st.sidebar.selectbox(
     "Choose a tool", 
     [
@@ -20,11 +23,13 @@ tool = st.sidebar.selectbox(
         "Exercise Planner",
         "Nutrition Analyzer",
         "Symptom Checker",
-        "📊 Health Charts"
+        "📊 Health Charts",
+        "📬 View Feedback"
     ]
 )
 
-# Height conversion utilities:-
+# Utilities
+
 def height_to_inches(height_str):
     try:
         if "'" in height_str:
@@ -57,15 +62,13 @@ def convert_height_to_cm(height_str):
     total_inches = feet * 12 + inches
     return round(total_inches * 2.54, 2)
 
-# Session states
+# Initialize scores
 if 'nutrition_score' not in st.session_state:
     st.session_state.nutrition_score = 0
 if 'exercise_score' not in st.session_state:
     st.session_state.exercise_score = 0
-if 'show_feedback' not in st.session_state:
-    st.session_state.show_feedback = False
 
-# TOOL 1: Ideal Body Weight Calculator
+# Tool: IBW
 if tool == "Ideal Body Weight Calculator":
     st.header("🏋️ Ideal Body Weight (IBW) Calculator")
     height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
@@ -87,13 +90,14 @@ if tool == "Ideal Body Weight Calculator":
                 ibw = 45.5 + 2.3 * (height_in - base_height) if height_in > base_height else 45.5
             st.success(f"Your Ideal Body Weight is approximately {ibw:.2f} kg")
 
-# TOOL 2: Exercise Planner
+# Tool: Exercise Planner
 elif tool == "Exercise Planner":
     st.header("🧘 Exercise Planner")
     age = st.number_input("Enter your age", min_value=1, max_value=120, step=1)
     gen = st.selectbox("Select your gender", options=["-- Select --", "male", "female"])
     if gen == "-- Select --":
         gen = None
+
     height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
     weight = st.number_input("Enter your weight in kg", min_value=10.0, max_value=300.0, step=0.1)
     goal = st.selectbox("What's your fitness goal?", ["Weight Loss", "Muscle Gain", "General Fitness", "Flexibility & Stress Relief"])
@@ -136,20 +140,19 @@ elif tool == "Exercise Planner":
 
             st.session_state.exercise_score = 25
 
-# TOOL 3: Nutrition Analyzer
+# Tool: Nutrition Analyzer
 elif tool == "Nutrition Analyzer":
     st.header("🍽️ Nutrition Analyzer")
-    st.write("This tool estimates your caloric needs and offers a basic diet plan.")
+    st.write("This tool estimates your daily caloric needs and suggests a South Indian-style diet plan.")
+
     age = st.number_input("Enter your age", min_value=1, max_value=120, step=1)
     gen = st.selectbox("Select your gender", options=["-- Select --", "male", "female"])
-    if gen == "-- Select --":
-        gen = None
     height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
     weight = st.number_input("Enter your weight in kg", min_value=10.0, max_value=300.0, step=0.1)
     diet_type = st.radio("Are you vegan or non-vegan?", ["non-vegan", "vegan"])
 
     if st.button("Analyze Diet Plan"):
-        if gen is None:
+        if gen == "-- Select --":
             st.error("Please select a gender.")
         elif not height_str:
             st.error("Please enter your height.")
@@ -158,32 +161,28 @@ elif tool == "Nutrition Analyzer":
             if height_cm is None:
                 st.error("Invalid height format. Please use formats like 5'7 or 5 ft 7 in.")
             else:
-                if gen == "male":
-                    bmr = 10 * weight + 6.25 * height_cm - 5 * age + 5
-                else:
-                    bmr = 10 * weight + 6.25 * height_cm - 5 * age - 161
+                bmr = 10 * weight + 6.25 * height_cm - 5 * age + (5 if gen == "male" else -161)
                 caloric_needs = int(bmr * 1.2)
                 st.success("Nutrition analysis complete!")
                 st.write(f"Your estimated daily caloric need is **{caloric_needs} calories**.")
 
                 st.subheader(f"Here's a sample {diet_type} South Indian-style diet plan:")
-
                 if diet_type == "non-vegan":
                     st.markdown("""
                     - **Breakfast:** Boiled egg with poha, Banana with milk
-                    - **Lunch:** Fish gravy with roti/rice, Chicken curry
+                    - **Lunch:** Fish gravy with rice, Chicken curry with roti
                     - **Dinner:** Fish fry with chapati, Egg masala with jowar roti
                     """)
                 else:
                     st.markdown("""
-                    - **Breakfast:** Millet dosa with chutney, Veg salad with toasted paneer
-                    - **Lunch:** Roti with lettuce/paneer/mushroom, Brown rice with mixed dal
-                    - **Dinner:** Veggies and nuts, Salad with channa, rajma, sprouts
+                    - **Breakfast:** Millet dosa with coconut chutney, Salad with toasted paneer
+                    - **Lunch:** Roti with paneer & mushroom curry, Brown rice with dal
+                    - **Dinner:** Steamed vegetables and nuts, Salad with channa, rajma, sprouts
                     """)
 
                 st.session_state.nutrition_score = 25
 
-# TOOL 4: Symptom Checker
+# Tool: Symptom Checker
 elif tool == "Symptom Checker":
     st.header("🤔 Symptom Checker")
     symptoms = ["headache", "fatigue", "cold", "fever", "vomiting", "dizziness", "dehydration", "diarrhea", "sunburn", "heat rash", "muscle cramps", "nausea", "sore throat"]
@@ -205,8 +204,9 @@ elif tool == "Symptom Checker":
     }
 
     selected = st.multiselect("Select symptoms", symptoms)
+    st.session_state.selected_symptoms = selected
+
     if selected:
-        st.session_state.symptoms = selected
         for sym in selected:
             cause, solution = symptom_info.get(sym, ("Unknown", "Consult a doctor."))
             st.subheader(sym.capitalize())
@@ -223,84 +223,44 @@ elif tool == "Symptom Checker":
         st.write(f"**Exercise Score:** {st.session_state.exercise_score}/25")
         st.success(f"✅ Total Score: {total_score}/100")
 
-# TOOL 5: Health Charts
+# Tool: 📊 Health Charts
 elif tool == "📊 Health Charts":
-    st.header("📊 Health Visualization")
-    st.write("Here you can visualize your health progress across symptoms, nutrition, and exercise.")
+    st.header("📊 Visualize Your Health Scores")
 
-    labels = ['Symptoms', 'Nutrition', 'Exercise']
-    scores = [
-        max(0, 50 - len(st.session_state.get('symptoms', [])) * 5) if 'symptoms' in st.session_state else 50,
-        st.session_state.nutrition_score,
-        st.session_state.exercise_score
-    ]
+    symptom_score = max(50 - len(st.session_state.get("selected_symptoms", [])) * 5, 0) if "selected_symptoms" in st.session_state else 50
+    nutrition_score = st.session_state.get("nutrition_score", 0)
+    exercise_score = st.session_state.get("exercise_score", 0)
+    total_score = symptom_score + nutrition_score + exercise_score
 
-    st.subheader("🟠 Pie Chart")
+    # Pie Chart
+    st.subheader("🥧 Score Distribution - Pie Chart")
+    pie_labels = ['Symptom', 'Nutrition', 'Exercise']
+    pie_scores = [symptom_score, nutrition_score, exercise_score]
     fig1, ax1 = plt.subplots()
-    ax1.pie(scores, labels=labels, autopct='%1.1f%%', startangle=90)
+    ax1.pie(pie_scores, labels=pie_labels, autopct='%1.1f%%', startangle=140)
     ax1.axis('equal')
     st.pyplot(fig1)
 
-    st.subheader("🕸️ Radar Chart")
-    fig2 = plt.figure()
-    angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False).tolist()
-    scores += scores[:1]
+    # Radar Chart
+    st.subheader("📈 Score Balance - Radar Chart")
+    categories = ['Symptom', 'Nutrition', 'Exercise']
+    values = [symptom_score, nutrition_score, exercise_score]
+    values += values[:1]
+
+    angles = np.linspace(0, 2 * np.pi, len(categories), endpoint=False).tolist()
     angles += angles[:1]
 
-    ax2 = fig2.add_subplot(111, polar=True)
-    ax2.plot(angles, scores, 'o-', linewidth=2)
-    ax2.fill(angles, scores, alpha=0.25)
-    ax2.set_thetagrids(np.degrees(angles[:-1]), labels)
-    ax2.set_title("Wellness Radar Chart")
-    ax2.grid(True)
+    fig2, ax2 = plt.subplots(subplot_kw=dict(polar=True))
+    ax2.plot(angles, values, color='teal', linewidth=2)
+    ax2.fill(angles, values, color='teal', alpha=0.3)
+    ax2.set_yticklabels([])
+    ax2.set_xticks(angles[:-1])
+    ax2.set_xticklabels(categories)
+    ax2.set_title("Health Score Radar", y=1.1)
     st.pyplot(fig2)
 
-# -------------------------
-# 💬 FEEDBACK BUBBLE
-# -------------------------
-st.markdown(
-    """
-    <style>
-    .feedback-button {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        background-color: #ff4b4b;
-        color: white;
-        border-radius: 50%;
-        width: 60px;
-        height: 60px;
-        text-align: center;
-        font-size: 30px;
-        cursor: pointer;
-        z-index: 100;
-        line-height: 60px;
-    }
-    </style>
-    <div class="feedback-button" onclick="document.querySelector('button[kind=primary]').click()">💬</div>
-    """,
-    unsafe_allow_html=True
-)
-
-# Show feedback form
-if st.button("Give Feedback 💬"):
-    st.session_state.show_feedback = True
-
-if st.session_state.show_feedback:
     st.markdown("---")
-    st.subheader("📝 Feedback")
-    name = st.text_input("Name")
-    rating = st.slider("Rate your experience (1 = Poor, 5 = Excellent)", 1, 5)
-    comment = st.text_area("Your Comments")
-
-    if st.button("Submit Feedback"):
-        feedback_data = {"Name": name, "Rating": rating, "Comment": comment}
-        df = pd.DataFrame([feedback_data])
-
-        if os.path.exists("user_feedback.csv"):
-            df.to_csv("user_feedback.csv", mode='a', header=False, index=False)
-        else:
-            df.to_csv("user_feedback.csv", index=False)
-
-        st.success("✅ Thanks for your feedback!")
-        st.session_state.show_feedback = False
+    st.write(f"**Symptom Score:** {symptom_score}/50")
+    st.write(f"**Nutrition Score:** {nutrition_score}/25")
+    st.write(f"**Exercise Score:** {exercise_score}/25")
+    st.success(f"✅ Total Wellness Score: {total_score}/100")
