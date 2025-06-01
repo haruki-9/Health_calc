@@ -1,6 +1,3 @@
-# Generating the full working Streamlit code with Option 1 integrated (session_state for feedback storage)
-
-updated_code = '''
 import streamlit as st
 import requests
 import json
@@ -47,8 +44,8 @@ def height_to_inches(height_str):
 def convert_height_to_cm(height_str):
     feet = 0
     inches = 0
-    match1 = re.match(r"(\\d+)'(\\d+)", height_str)
-    match2 = re.match(r"(\\d+)\\s*ft\\s*(\\d*)\\s*in*", height_str)
+    match1 = re.match(r"(\d+)'(\d+)", height_str)
+    match2 = re.match(r"(\d+)\s*ft\s*(\d*)\s*in*", height_str)
     if match1:
         feet = int(match1.group(1))
         inches = int(match1.group(2))
@@ -60,6 +57,7 @@ def convert_height_to_cm(height_str):
     total_inches = feet * 12 + inches
     return round(total_inches * 2.54, 2)
 
+# Session defaults
 if 'nutrition_score' not in st.session_state:
     st.session_state.nutrition_score = 0
 if 'exercise_score' not in st.session_state:
@@ -67,6 +65,7 @@ if 'exercise_score' not in st.session_state:
 if 'is_admin' not in st.session_state:
     st.session_state.is_admin = False
 
+# Tools
 if tool == "Ideal Body Weight Calculator":
     st.header("🏋️ Ideal Body Weight (IBW) Calculator")
     height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
@@ -100,10 +99,10 @@ elif tool == "Exercise Planner":
         else:
             st.success("Here’s your recommended fitness plan:")
             plans = {
-                "Weight Loss": "- Cardio 5x/week\\n- Strength 2–3x/week\\n- Sleep 7–8 hrs\\n- Hydration: 2.5–3L",
-                "Muscle Gain": "- Strength 4–5x/week\\n- Protein: dal, eggs, sprouts\\n- Light cardio\\n- Sleep 8 hrs",
-                "General Fitness": "- Mix of cardio + strength + yoga 3–4x/week\\n- Local grains & pulses",
-                "Flexibility & Stress Relief": "- Yoga, breathing, walks\\n- Meditation, stretching"
+                "Weight Loss": "- Cardio 5x/week\n- Strength 2–3x/week\n- Sleep 7–8 hrs\n- Hydration: 2.5–3L",
+                "Muscle Gain": "- Strength 4–5x/week\n- Protein: dal, eggs, sprouts\n- Light cardio\n- Sleep 8 hrs",
+                "General Fitness": "- Mix of cardio + strength + yoga 3–4x/week\n- Local grains & pulses",
+                "Flexibility & Stress Relief": "- Yoga, breathing, walks\n- Meditation, stretching"
             }
             st.markdown(plans[goal])
             st.session_state.exercise_score = 25
@@ -127,8 +126,8 @@ elif tool == "Nutrition Analyzer":
                 caloric_needs = int(bmr * 1.2)
                 st.success(f"Daily Caloric Need: **{caloric_needs} calories**")
                 plans = {
-                    "non-vegan": "- Breakfast: Poha + egg + milk\\n- Lunch: Rice + fish + chicken\\n- Dinner: Chapati + egg curry",
-                    "vegan": "- Breakfast: Millet dosa + chutney\\n- Lunch: Roti + paneer/mushroom\\n- Dinner: Veg salad + sprouts"
+                    "non-vegan": "- Breakfast: Poha + egg + milk\n- Lunch: Rice + fish + chicken\n- Dinner: Chapati + egg curry",
+                    "vegan": "- Breakfast: Millet dosa + chutney\n- Lunch: Roti + paneer/mushroom\n- Dinner: Veg salad + sprouts"
                 }
                 st.subheader(f"{diet_type.title()} South Indian Diet Plan:")
                 st.markdown(plans[diet_type])
@@ -156,11 +155,11 @@ elif tool == "Symptom Checker":
     if selected:
         for sym in selected:
             cause, remedy = info.get(sym, ("Unknown", "See doctor"))
-            st.write(f"**{sym.title()}**\\nCause: {cause}\\nSolution: {remedy}")
+            st.write(f"**{sym.title()}**\nCause: {cause}\nSolution: {remedy}")
         symptom_score = max(50 - len(selected) * 5, 0)
         total = symptom_score + st.session_state.nutrition_score + st.session_state.exercise_score
         st.markdown("---")
-        st.write(f"Symptom Score: {symptom_score}/50\\nNutrition: {st.session_state.nutrition_score}/25\\nExercise: {st.session_state.exercise_score}/25")
+        st.write(f"Symptom Score: {symptom_score}/50\nNutrition: {st.session_state.nutrition_score}/25\nExercise: {st.session_state.exercise_score}/25")
         st.success(f"✅ Wellness Score: {total}/100")
 
 elif tool == "📬 View Feedback":
@@ -168,8 +167,8 @@ elif tool == "📬 View Feedback":
     password = st.text_input("Enter admin password", type="password")
     if password == ADMIN_PASSWORD:
         st.session_state.is_admin = True
-        if "feedback" in st.session_state:
-            df = pd.DataFrame(st.session_state.feedback)
+        if os.path.exists("user_feedback.csv"):
+            df = pd.read_csv("user_feedback.csv")
             st.success("Access granted!")
             st.dataframe(df)
         else:
@@ -204,12 +203,15 @@ with st.expander("💬 Submit Feedback"):
     rating = st.slider("Rate your experience (1–5)", 1, 5, 3)
     comment = st.text_area("Your Comments")
     if st.button("Submit Feedback"):
-        if "feedback" not in st.session_state:
-            st.session_state.feedback = []
-        st.session_state.feedback.append({"Name": name, "Rating": rating, "Comment": comment})
+        feedback_df = pd.DataFrame([[name, rating, comment]], columns=["Name", "Rating", "Comment"])
+        if os.path.exists("user_feedback.csv"):
+            feedback_df.to_csv("user_feedback.csv", mode='a', header=False, index=False)
+        else:
+            feedback_df.to_csv("user_feedback.csv", index=False)
         st.success("✅ Feedback submitted! Thank you!")
 
-st.markdown("""
+st.markdown(
+    """
     <style>
         .stApp {
             overflow-x: hidden;
@@ -217,7 +219,6 @@ st.markdown("""
         #MainMenu {visibility: hidden;}
         footer {visibility: hidden;}
     </style>
-""", unsafe_allow_html=True)
-'''
-
-updated_code[:1000]  # Preview only, will provide complete file next.
+    """,
+    unsafe_allow_html=True
+)
