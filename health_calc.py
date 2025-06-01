@@ -89,7 +89,6 @@ if tool == "Ideal Body Weight Calculator":
             else:
                 ibw = 45.5 + 2.3 * (height_in - base_height) if height_in > base_height else 45.5
             st.success(f"Your Ideal Body Weight is approximately {ibw:.2f} kg")
-
 # Tool: Exercise Planner
 elif tool == "Exercise Planner":
     st.header("🧘 Exercise Planner")
@@ -140,6 +139,7 @@ elif tool == "Exercise Planner":
 
             st.session_state.exercise_score = 25
 
+
 # Tool: Nutrition Analyzer
 elif tool == "Nutrition Analyzer":
     st.header("🍽️ Nutrition Analyzer")
@@ -181,6 +181,7 @@ elif tool == "Nutrition Analyzer":
                     """)
 
                 st.session_state.nutrition_score = 25
+
 
 # Tool: Symptom Checker
 elif tool == "Symptom Checker":
@@ -264,3 +265,62 @@ elif tool == "📊 Health Charts":
     st.write(f"**Nutrition Score:** {nutrition_score}/25")
     st.write(f"**Exercise Score:** {exercise_score}/25")
     st.success(f"✅ Total Wellness Score: {total_score}/100")
+
+# Tool: 📬 View Feedback
+elif tool == "📬 View Feedback":
+    st.header("📬 User Feedback")
+    if os.path.exists("feedback.csv"):
+        df = pd.read_csv("feedback.csv")
+        st.dataframe(df)
+    else:
+        st.info("No feedback received yet.")
+
+# Floating Feedback Button
+st.markdown("""
+    <style>
+        #feedback-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #f63366;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+    </style>
+    <script>
+        function showForm() {
+            var el = window.parent.document.querySelector("details[open]");
+            if (!el) {
+                window.parent.document.querySelector("details").setAttribute("open", "true");
+            }
+        }
+    </script>
+    <button id="feedback-btn" onclick="showForm()">Feedback</button>
+""", unsafe_allow_html=True)
+
+with st.expander("Submit Feedback"):
+    st.subheader("📝 We'd love your feedback!")
+    name = st.text_input("Your Name (optional)")
+    rating = st.slider("Rate your experience (1-5)", 1, 5, 3)
+    comment = st.text_area("Comments")
+
+    if st.button("Submit Feedback"):
+        feedback_entry = {
+            "Name": name,
+            "Rating": rating,
+            "Comment": comment
+        }
+
+        df = pd.DataFrame([feedback_entry])
+
+        if os.path.exists("feedback.csv"):
+            df.to_csv("feedback.csv", mode='a', header=False, index=False)
+        else:
+            df.to_csv("feedback.csv", index=False)
+
+        st.success("Thank you for your feedback!")
