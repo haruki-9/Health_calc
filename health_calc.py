@@ -1,4 +1,4 @@
-# Rewriting the full updated Streamlit app code with pie chart, radar chart, and enhanced feedback logic
+# Updated Streamlit app code with pie chart, radar chart, and enhanced feedback logic
 
 full_code_path = "/mnt/data/updated_health_app.py"
 
