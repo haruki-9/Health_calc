@@ -28,7 +28,7 @@ tool = st.sidebar.selectbox(
     ]
 )
 
-# Utilities
+# Utilities:
 
 def height_to_inches(height_str):
     try:
