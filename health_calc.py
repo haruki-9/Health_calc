@@ -1,9 +1,14 @@
 import streamlit as st
-import re
 import requests
 import json
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
+import os
+import re
+
+# ---------- Admin Config ----------
+ADMIN_PASSWORD = "admin123"  # Change this to a secure password
 
 st.set_page_config(page_title="Health Assistant App", layout="centered")
 
@@ -18,11 +23,13 @@ tool = st.sidebar.selectbox(
         "Exercise Planner",
         "Nutrition Analyzer",
         "Symptom Checker",
-        "📊 Health Charts"
+        "📊 Health Charts",
+        "📬 View Feedback"
     ]
 )
 
-# Utility to convert height string to inches:-
+# Utilities
+
 def height_to_inches(height_str):
     try:
         if "'" in height_str:
@@ -37,7 +44,6 @@ def height_to_inches(height_str):
     except:
         return None
 
-# Utility to convert height to cm
 def convert_height_to_cm(height_str):
     feet = 0
     inches = 0
@@ -62,11 +68,10 @@ if 'nutrition_score' not in st.session_state:
 if 'exercise_score' not in st.session_state:
     st.session_state.exercise_score = 0
 
-# Tool: Ideal Body Weight Calculator
+# Tool: IBW
 if tool == "Ideal Body Weight Calculator":
     st.header("🏋️ Ideal Body Weight (IBW) Calculator")
     height_str = st.text_input("Enter your height (e.g., 5'7 or 5 ft 7 in)")
-
     gen = st.selectbox("Select your gender", options=["-- Select --", "male", "female"])
     if gen == "-- Select --":
         gen = None
@@ -105,6 +110,7 @@ elif tool == "Exercise Planner":
             st.error("Please select a gender.")
         else:
             st.success("Here’s your recommended fitness plan:")
+
             if goal == "Weight Loss":
                 st.markdown("""
                 - **Cardio:** 5 days/week – 30 to 45 minutes/session  
@@ -134,7 +140,7 @@ elif tool == "Exercise Planner":
 
             st.session_state.exercise_score = 25
 
-# Tool: Nutrition Analyzer (updated)
+# Tool: Nutrition Analyzer
 elif tool == "Nutrition Analyzer":
     st.header("🍽️ Nutrition Analyzer")
     st.write("This tool estimates your daily caloric needs and suggests a South Indian-style diet plan.")
@@ -155,40 +161,23 @@ elif tool == "Nutrition Analyzer":
             if height_cm is None:
                 st.error("Invalid height format. Please use formats like 5'7 or 5 ft 7 in.")
             else:
-                if gen == "male":
-                    bmr = 10 * weight + 6.25 * height_cm - 5 * age + 5
-                else:
-                    bmr = 10 * weight + 6.25 * height_cm - 5 * age - 161
-
+                bmr = 10 * weight + 6.25 * height_cm - 5 * age + (5 if gen == "male" else -161)
                 caloric_needs = int(bmr * 1.2)
                 st.success("Nutrition analysis complete!")
                 st.write(f"Your estimated daily caloric need is **{caloric_needs} calories**.")
 
                 st.subheader(f"Here's a sample {diet_type} South Indian-style diet plan:")
-
                 if diet_type == "non-vegan":
                     st.markdown("""
-                    - **Breakfast:**  
-                      - Boiled egg with poha  
-                      - Banana with milk  
-                    - **Lunch:**  
-                      - Fish gravy with roti/rice  
-                      - Chicken curry with chapati  
-                    - **Dinner:**  
-                      - Fish fry with chapati/pulka  
-                      - Egg masala with jowar roti  
+                    - **Breakfast:** Boiled egg with poha, Banana with milk
+                    - **Lunch:** Fish gravy with rice, Chicken curry with roti
+                    - **Dinner:** Fish fry with chapati, Egg masala with jowar roti
                     """)
                 else:
                     st.markdown("""
-                    - **Breakfast:**  
-                      - Millet dosa with coconut chutney  
-                      - Steamed vegetables with toasted paneer  
-                    - **Lunch:**  
-                      - Roti with lettuce, paneer, and mushroom curry  
-                      - Brown rice with mixed dal curry  
-                    - **Dinner:**  
-                      - Steamed vegetables and steamed nuts  
-                      - Salad with channa, rajma, and sprouts  
+                    - **Breakfast:** Millet dosa with coconut chutney, Salad with toasted paneer
+                    - **Lunch:** Roti with paneer & mushroom curry, Brown rice with dal
+                    - **Dinner:** Steamed vegetables and nuts, Salad with channa, rajma, sprouts
                     """)
 
                 st.session_state.nutrition_score = 25
@@ -232,36 +221,59 @@ elif tool == "Symptom Checker":
         st.write(f"**Exercise Score:** {st.session_state.exercise_score}/25")
         st.success(f"✅ Total Score: {total_score}/100")
 
-# Tool: Health Charts
-elif tool == "📊 Health Charts":
-    st.header("📊 Health Visualization")
-    st.write("Here you can visualize your health progress across symptoms, nutrition, and exercise.")
+# Tool: View Feedback (Admin only)
+elif tool == "📬 View Feedback":
+    st.header("🔐 Admin Login - Feedback Viewer")
+    password = st.text_input("Enter admin password", type="password")
+    if password == ADMIN_PASSWORD:
+        if os.path.exists("user_feedback.csv"):
+            st.success("Access granted!")
+            df = pd.read_csv("user_feedback.csv")
+            st.dataframe(df)
+        else:
+            st.info("No feedback has been submitted yet.")
+    elif password:
+        st.error("Incorrect password.")
 
-    labels = ['Symptoms', 'Nutrition', 'Exercise']
-    scores = [
-        max(0, 50 - len(st.session_state.get('symptoms', [])) * 5) if 'symptoms' in st.session_state else 50,
-        st.session_state.nutrition_score,
-        st.session_state.exercise_score
-    ]
+# Floating Feedback Form (Bottom Right)
+st.markdown("""
+    <style>
+        #feedback-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #25A18E;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 9999;
+        }
+    </style>
+    <script>
+        function showForm() {
+            const form = document.getElementById('feedback-form');
+            if (form.style.display === 'none') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+    </script>
+    <button id="feedback-btn" onclick="showForm()">Feedback</button>
+""", unsafe_allow_html=True)
 
-    # Pie Chart
-    st.subheader("🟠 Pie Chart")
-    fig1, ax1 = plt.subplots()
-    ax1.pie(scores, labels=labels, autopct='%1.1f%%', startangle=90)
-    ax1.axis('equal')
-    st.pyplot(fig1)
-
-    # Radar Chart
-    st.subheader("🕸️ Radar Chart")
-    fig2 = plt.figure()
-    angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False).tolist()
-    scores += scores[:1]
-    angles += angles[:1]
-
-    ax2 = fig2.add_subplot(111, polar=True)
-    ax2.plot(angles, scores, 'o-', linewidth=2)
-    ax2.fill(angles, scores, alpha=0.25)
-    ax2.set_thetagrids(np.degrees(angles[:-1]), labels)
-    ax2.set_title("Wellness Radar Chart")
-    ax2.grid(True)
-    st.pyplot(fig2)
+with st.expander("Submit Feedback"):
+    st.subheader("📝 We'd love your feedback!")
+    name = st.text_input("Your Name (optional)")
+    rating = st.slider("Rate your experience (1-5)", 1, 5, 3)
+    comment = st.text_area("Comments")
+    if st.button("Submit Feedback"):
+        feedback_df = pd.DataFrame([[name, rating, comment]], columns=["Name", "Rating", "Comment"])
+        if os.path.exists("user_feedback.csv"):
+            feedback_df.to_csv("user_feedback.csv", mode='a', header=False, index=False)
+        else:
+            feedback_df.to_csv("user_feedback.csv", index=False)
+        st.success("Thank you for your feedback!")
