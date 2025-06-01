@@ -15,10 +15,20 @@ st.set_page_config(page_title="Health Assistant App", layout="centered")
 st.title("💪 Health Assistant App")
 st.write("Welcome! Choose a tool from the sidebar.")
 
-# Sidebar options:-
-tool = st.sidebar.selectbox(
-    "Choose a tool", 
-    [
+# Admin Login Section
+with st.sidebar.expander("🔐 Admin Login"):
+    admin_input = st.text_input("Enter admin password", type="password")
+    if st.button("Login"):
+        if admin_input == ADMIN_PASSWORD:
+            st.session_state.is_admin = True
+            st.success("Admin access granted.")
+        else:
+            st.session_state.is_admin = False
+            st.error("Incorrect password.")
+
+# Determine available tools based on admin status
+if st.session_state.get("is_admin"):
+    tools = [
         "Ideal Body Weight Calculator",
         "Exercise Planner",
         "Nutrition Analyzer",
@@ -26,7 +36,17 @@ tool = st.sidebar.selectbox(
         "📊 Health Charts",
         "📬 View Feedback"
     ]
-)
+else:
+    tools = [
+        "Ideal Body Weight Calculator",
+        "Exercise Planner",
+        "Nutrition Analyzer",
+        "Symptom Checker",
+        "📊 Health Charts"
+    ]
+
+# Sidebar options
+tool = st.sidebar.selectbox("Choose a tool", tools)
 
 # Utilities
 
@@ -89,6 +109,7 @@ if tool == "Ideal Body Weight Calculator":
             else:
                 ibw = 45.5 + 2.3 * (height_in - base_height) if height_in > base_height else 45.5
             st.success(f"Your Ideal Body Weight is approximately {ibw:.2f} kg")
+
 # Tool: Exercise Planner
 elif tool == "Exercise Planner":
     st.header("🧘 Exercise Planner")
@@ -139,7 +160,6 @@ elif tool == "Exercise Planner":
 
             st.session_state.exercise_score = 25
 
-
 # Tool: Nutrition Analyzer
 elif tool == "Nutrition Analyzer":
     st.header("🍽️ Nutrition Analyzer")
@@ -181,7 +201,6 @@ elif tool == "Nutrition Analyzer":
                     """)
 
                 st.session_state.nutrition_score = 25
-
 
 # Tool: Symptom Checker
 elif tool == "Symptom Checker":
@@ -266,8 +285,8 @@ elif tool == "📊 Health Charts":
     st.write(f"**Exercise Score:** {exercise_score}/25")
     st.success(f"✅ Total Wellness Score: {total_score}/100")
 
-# Tool: 📬 View Feedback
-elif tool == "📬 View Feedback":
+# Tool: 📬 View Feedback (Admin Only)
+elif tool == "📬 View Feedback" and st.session_state.get("is_admin"):
     st.header("📬 User Feedback")
     if os.path.exists("feedback.csv"):
         df = pd.read_csv("feedback.csv")
