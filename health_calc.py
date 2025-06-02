@@ -6,19 +6,72 @@ import numpy as np
 import pandas as pd
 import os
 import re
+import hashlib
 
 # ---------- Admin Config ----------
 ADMIN_PASSWORD = "Admin160622"  # Change this to a secure password
+USERS_FILE = "users.csv"
 
 st.set_page_config(page_title="Health Assistant App", layout="centered")
 
 st.title("💪 Health Assistant App")
 st.write("Welcome! Choose a tool from the sidebar.")
 
-# Admin Login Section
+# ---------- User Registration & Login ----------
+def hash_password(password):
+    return hashlib.sha256(password.encode()).hexdigest()
+
+def save_user(username, password):
+    hashed_pw = hash_password(password)
+    df = pd.DataFrame([[username, hashed_pw]], columns=["username", "password"])
+    if os.path.exists(USERS_FILE):
+        df.to_csv(USERS_FILE, mode='a', header=False, index=False)
+    else:
+        df.to_csv(USERS_FILE, index=False)
+
+def check_user(username, password):
+    if not os.path.exists(USERS_FILE):
+        return False
+    df = pd.read_csv(USERS_FILE)
+    hashed_pw = hash_password(password)
+    return ((df['username'] == username) & (df['password'] == hashed_pw)).any()
+
+with st.sidebar.expander("👤 User Login / Register"):
+    login_tab, register_tab = st.tabs(["🔓 Login", "📝 Register"])
+
+    with login_tab:
+        username_login = st.text_input("Username")
+        password_login = st.text_input("Password", type="password")
+        if st.button("Login"):
+            if check_user(username_login, password_login):
+                st.session_state.logged_in = True
+                st.session_state.username = username_login
+                st.success(f"Welcome back, {username_login}!")
+            else:
+                st.error("Invalid username or password.")
+
+    with register_tab:
+        username_reg = st.text_input("Choose Username")
+        password_reg = st.text_input("Choose Password", type="password")
+        if st.button("Register"):
+            if username_reg and password_reg:
+                if os.path.exists(USERS_FILE):
+                    existing = pd.read_csv(USERS_FILE)
+                    if username_reg in existing['username'].values:
+                        st.error("Username already exists. Please choose another.")
+                    else:
+                        save_user(username_reg, password_reg)
+                        st.success("Registration successful. You can now log in.")
+                else:
+                    save_user(username_reg, password_reg)
+                    st.success("Registration successful. You can now log in.")
+            else:
+                st.warning("Please enter both username and password.")
+
+# ---------- Admin Login ----------
 with st.sidebar.expander("🔐 Admin Login"):
     admin_input = st.text_input("Enter admin password", type="password")
-    if st.button("Login"):
+    if st.button("Login as Admin"):
         if admin_input == ADMIN_PASSWORD:
             st.session_state.is_admin = True
             st.success("Admin access granted.")
@@ -343,3 +396,4 @@ with st.expander("Submit Feedback"):
             df.to_csv("feedback.csv", index=False)
 
         st.success("Thank you for your feedback!")
+
