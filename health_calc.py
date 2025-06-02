@@ -210,17 +210,17 @@ elif tool == "Symptom Checker":
     symptom_info = {
         "headache": ("Dehydration, stress", "Drink water, rest."),
         "fatigue": ("Lack of sleep", "Get proper rest."),
-        "cold": ("Viral", "Take rest, drink fluids."),
+        "cold": ("Viral Infection", "Take rest, drink fluids."),
         "fever": ("Infection", "Use paracetamol."),
         "vomiting": ("Food poisoning", "Use ORS, avoid solid food."),
         "dizziness": ("Low BP", "Sit down, drink fluids."),
         "dehydration": ("Low fluids", "Drink ORS."),
         "diarrhea": ("Contaminated food", "Hydrate."),
         "sunburn": ("UV exposure", "Use aloe vera."),
-        "heat rash": ("Sweat glands", "Keep cool."),
+        "heat rash": ("Blocked sweat glands", "Keep cool."),
         "muscle cramps": ("Overuse", "Stretch, hydrate."),
         "nausea": ("Indigestion", "Rest, sip fluids."),
-        "sore throat": ("Infection", "Gargle, warm fluids.")
+        "sore throat": ("Infection", "Gargle,drink warm fluids.")
     }
 
     selected = st.multiselect("Select symptoms", symptoms)
