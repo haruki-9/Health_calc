@@ -110,9 +110,11 @@ def load_wellness_tasks():
     file = f"planner_{st.session_state.username}.csv"
     if os.path.exists(file):
         df = pd.read_csv(file)
-        if 'last_updated' not in df.columns:
-            df['last_updated'] = datetime.now().isoformat()
-        return df
+        required_cols = ["task", "completed", "timestamp", "last_updated"]
+        for col in required_cols:
+            if col not in df.columns:
+                df[col] = "" if col != "completed" else False
+        return df[required_cols]
     return pd.DataFrame(columns=["task", "completed", "timestamp", "last_updated"])
 
 def save_wellness_tasks(df):
@@ -143,6 +145,7 @@ if tool == "My Wellness Planner":
             submit = st.form_submit_button("Add Task")
             if submit and new_task:
                 deadline = (datetime.now() + timedelta(minutes=duration)).isoformat()
+                df_tasks = df_tasks[["task", "completed", "timestamp", "last_updated"]]
                 df_tasks.loc[len(df_tasks)] = [new_task, False, datetime.now().isoformat(), datetime.now().isoformat()]
                 save_wellness_tasks(df_tasks)
                 st.success("Task added!")
@@ -164,7 +167,7 @@ if tool == "My Wellness Planner":
         save_wellness_tasks(df_tasks)
 
         st.markdown("---")
-        st.subheader("🏅 Weekly & Monthly Badges")
+        st.subheader("🏋 Weekly & Monthly Badges")
         completed = df_tasks[df_tasks['completed'] == True]
 
         badge_history_file = f"badges_{st.session_state.username}.csv"
@@ -197,7 +200,6 @@ if tool == "My Wellness Planner":
         with st.expander("🔮 Sneak Peek: Upcoming Badges"):
             st.markdown("- Complete 5 tasks: 🏅 Week 1 Champ")
             st.markdown("- Complete 20 tasks: 🏆 Month Champ")
-
 
 # Utilities
 
