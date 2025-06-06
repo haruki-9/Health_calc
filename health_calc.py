@@ -103,7 +103,6 @@ else:
 
 # Sidebar options
 tool = st.sidebar.selectbox("Choose a tool", tools)
-
 # ---------- Wellness Planner ----------
 def load_wellness_tasks():
     file = f"planner_{st.session_state.username}.csv"
@@ -116,38 +115,38 @@ def save_wellness_tasks(df):
     df.to_csv(file, index=False)
 
 if tool == "My Wellness Planner":
-    st.header("🧠 My Wellness Planner")
-    df_tasks = load_wellness_tasks()
+    if not st.session_state.get("logged_in"):
+        st.warning("⚠️ Please log in to use the Wellness Planner.")
+    else:
+        st.header("🧠 My Wellness Planner")
+        df_tasks = load_wellness_tasks()
 
-    with st.form("add_task_form"):
-        new_task = st.text_input("Add a new wellness task")
-        submit = st.form_submit_button("Add Task")
-        if submit and new_task:
-            df_tasks.loc[len(df_tasks)] = [new_task, False, datetime.now().isoformat()]
-            save_wellness_tasks(df_tasks)
-            st.success("Task added!")
+        with st.form("add_task_form"):
+            new_task = st.text_input("Add a new wellness task")
+            submit = st.form_submit_button("Add Task")
+            if submit and new_task:
+                df_tasks.loc[len(df_tasks)] = [new_task, False, datetime.now().isoformat()]
+                save_wellness_tasks(df_tasks)
+                st.success("Task added!")
 
-    for idx, row in df_tasks.iterrows():
-        col1, col2 = st.columns([0.1, 0.9])
-        with col1:
-            if st.checkbox("", key=f"task_{idx}", value=row['completed']):
-                df_tasks.at[idx, 'completed'] = True
-        with col2:
-            st.text(row['task'])
+        for idx, row in df_tasks.iterrows():
+            col1, col2 = st.columns([0.1, 0.9])
+            with col1:
+                if st.checkbox("", key=f"task_{idx}", value=row['completed']):
+                    df_tasks.at[idx, 'completed'] = True
+            with col2:
+                st.text(row['task'])
 
-    save_wellness_tasks(df_tasks)
+        save_wellness_tasks(df_tasks)
 
-    st.markdown("---")
-    st.subheader("🏅 Weekly & Monthly Badges")
-    completed = df_tasks[df_tasks['completed'] == True]
+        st.markdown("---")
+        st.subheader("🏅 Weekly & Monthly Badges")
+        completed = df_tasks[df_tasks['completed'] == True]
 
-    if len(completed) >= 5:
-        st.success("🏅 Week 1 Champ Badge Unlocked!")
-    if len(completed) >= 20:
-        st.success("🏆 Month Champ Badge Unlocked!")
-
-# (Rest of the original code remains unchanged and is already included in your provided script.)
-
+        if len(completed) >= 5:
+            st.success("🏅 Week 1 Champ Badge Unlocked!")
+        if len(completed) >= 20:
+            st.success("🏆 Month Champ Badge Unlocked!")
 # Utilities
 
 def height_to_inches(height_str):
