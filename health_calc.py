@@ -7,10 +7,11 @@ import pandas as pd
 import os
 import re
 import hashlib
-from datetime import datetime
+from datetime import datetime, timedelta
+import time
 
 # ---------- Admin Config ----------
-ADMIN_PASSWORD = "Admin160622"  # Change this to a secure password
+ADMIN_PASSWORD = "Admin160622"
 USERS_FILE = "users.csv"
 
 st.set_page_config(page_title="Health Assistant App", layout="centered")
@@ -103,16 +104,46 @@ else:
 
 # Sidebar options
 tool = st.sidebar.selectbox("Choose a tool", tools)
+
 # ---------- Wellness Planner ----------
 def load_wellness_tasks():
     file = f"planner_{st.session_state.username}.csv"
     if os.path.exists(file):
-        return pd.read_csv(file)
-    return pd.DataFrame(columns=["task", "completed", "timestamp"])
+        df = pd.read_csv(file)
+        today = datetime.now().date()
+        if 'last_updated' in df.columns:
+            last_updated = pd.to_datetime(df['last_updated'][0]).date()
+            if last_updated != today:
+                df['completed'] = False
+                df['last_updated'] = today.isoformat()
+                save_wellness_tasks(df)
+        else:
+            df['last_updated'] = today.isoformat()
+            save_wellness_tasks(df)
+        return df
+    return pd.DataFrame(columns=["task", "completed", "timestamp", "due_time", "last_updated"])
 
 def save_wellness_tasks(df):
     file = f"planner_{st.session_state.username}.csv"
     df.to_csv(file, index=False)
+
+def log_badge(badge):
+    file = f"badges_{st.session_state.username}.csv"
+    now = datetime.now().isoformat()
+    if os.path.exists(file):
+        df = pd.read_csv(file)
+        if not ((df['badge'] == badge)).any():
+            df.loc[len(df)] = [badge, now]
+            df.to_csv(file, index=False)
+    else:
+        df = pd.DataFrame([[badge, now]], columns=["badge", "earned_on"])
+        df.to_csv(file, index=False)
+
+def load_badge_history():
+    file = f"badges_{st.session_state.username}.csv"
+    if os.path.exists(file):
+        return pd.read_csv(file)
+    return pd.DataFrame(columns=["badge", "earned_on"])
 
 if tool == "My Wellness Planner":
     if not st.session_state.get("logged_in"):
@@ -123,19 +154,28 @@ if tool == "My Wellness Planner":
 
         with st.form("add_task_form"):
             new_task = st.text_input("Add a new wellness task")
+            due_hour = st.slider("Task Due Hour (24hr format)", 1, 23, 23)
             submit = st.form_submit_button("Add Task")
             if submit and new_task:
-                df_tasks.loc[len(df_tasks)] = [new_task, False, datetime.now().isoformat()]
+                due_time = datetime.now().replace(hour=due_hour, minute=59, second=59).isoformat()
+                df_tasks.loc[len(df_tasks)] = [new_task, False, datetime.now().isoformat(), due_time, datetime.now().date().isoformat()]
                 save_wellness_tasks(df_tasks)
                 st.success("Task added!")
 
         for idx, row in df_tasks.iterrows():
-            col1, col2 = st.columns([0.1, 0.9])
+            col1, col2, col3 = st.columns([0.05, 0.7, 0.25])
             with col1:
                 if st.checkbox("", key=f"task_{idx}", value=row['completed']):
                     df_tasks.at[idx, 'completed'] = True
             with col2:
                 st.text(row['task'])
+            with col3:
+                if pd.notna(row['due_time']):
+                    time_left = pd.to_datetime(row['due_time']) - datetime.now()
+                    if time_left.total_seconds() > 0:
+                        st.metric("Time Left", str(time_left).split('.')[0])
+                    else:
+                        st.warning("⏰ Time's up!")
 
         save_wellness_tasks(df_tasks)
 
@@ -145,8 +185,26 @@ if tool == "My Wellness Planner":
 
         if len(completed) >= 5:
             st.success("🏅 Week 1 Champ Badge Unlocked!")
+            log_badge("Week 1 Champ")
         if len(completed) >= 20:
             st.success("🏆 Month Champ Badge Unlocked!")
+            log_badge("Month Champ")
+
+        with st.expander("📘 View Badge History"):
+            history = load_badge_history()
+            if not history.empty:
+                st.dataframe(history)
+            else:
+                st.info("No badges earned yet. Start completing tasks!")
+
+        with st.expander("🔮 Upcoming Badges Preview"):
+            st.markdown("""
+            - 🔒 **Week 1 Champ** – Complete 5 tasks ✅
+            - 🔒 **Week 2 Hero** – Complete 10 tasks
+            - 🔒 **Month Champ** – Complete 20+ tasks
+            """)
+
+
 # Utilities
 
 def height_to_inches(height_str):
