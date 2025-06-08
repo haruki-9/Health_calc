@@ -19,6 +19,14 @@ st.set_page_config(page_title="Health Assistant App", layout="centered")
 st.title("💪 Health Assistant App")
 st.write("Welcome! Choose a tool from the sidebar.")
 
+# ---------- Session State Initialization ----------
+if "logged_in" not in st.session_state:
+    st.session_state.logged_in = False
+if "username" not in st.session_state:
+    st.session_state.username = ""
+if "is_admin" not in st.session_state:
+    st.session_state.is_admin = False
+
 # ---------- User Registration & Login ----------
 def hash_password(password):
     return hashlib.sha256(password.encode()).hexdigest()
@@ -36,30 +44,35 @@ def check_user(username, password):
         return False
     df = pd.read_csv(USERS_FILE)
     hashed_pw = hash_password(password)
+    if 'username' not in df.columns or 'password' not in df.columns:
+        return False
     return ((df['username'] == username) & (df['password'] == hashed_pw)).any()
 
 with st.sidebar.expander("👤 User Login / Register"):
     login_tab, register_tab = st.tabs(["🔓 Login", "📝 Register"])
 
     with login_tab:
-        username_login = st.text_input("Username")
-        password_login = st.text_input("Password", type="password")
+        username_login = st.text_input("Username", key="login_user")
+        password_login = st.text_input("Password", type="password", key="login_pass")
         if st.button("Login"):
             if check_user(username_login, password_login):
                 st.session_state.logged_in = True
                 st.session_state.username = username_login
                 st.success(f"Welcome back, {username_login}!")
             else:
+                st.session_state.logged_in = False
                 st.error("Invalid username or password.")
 
     with register_tab:
-        username_reg = st.text_input("Choose Username")
-        password_reg = st.text_input("Choose Password", type="password")
+        username_reg = st.text_input("Choose Username", key="reg_user")
+        password_reg = st.text_input("Choose Password", type="password", key="reg_pass")
         if st.button("Register"):
             if username_reg and password_reg:
                 if os.path.exists(USERS_FILE):
                     existing = pd.read_csv(USERS_FILE)
-                    if username_reg in existing['username'].values:
+                    if 'username' not in existing.columns:
+                        st.error("Corrupted user file. Please contact admin.")
+                    elif username_reg in existing['username'].values:
                         st.error("Username already exists. Please choose another.")
                     else:
                         save_user(username_reg, password_reg)
@@ -125,7 +138,7 @@ if tool == "My Wellness Planner":
     if not st.session_state.get("logged_in"):
         st.warning("⚠️ Please log in to use the Wellness Planner.")
     else:
-        st.header("🧠 My Wellness Planner")
+        st.header("🧐 My Wellness Planner")
         df_tasks = load_wellness_tasks()
 
         # Auto-reset daily task completion
