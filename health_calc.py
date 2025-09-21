@@ -14,9 +14,9 @@ import time
 ADMIN_PASSWORD = "Admin160622"  # Change this to a secure password
 USERS_FILE = "users.csv"
 
-st.set_page_config(page_title="Health Assistant App", layout="centered")
+st.set_page_config(page_title="Health Assistant Dashboard", layout="centered")
 
-st.title("💪 Health Assistant App")
+st.title("💪 Health Assistant Dashboard")
 st.write("Welcome! Choose a tool from the sidebar.")
 
 # ---------- Session State Initialization ----------
