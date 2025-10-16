@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 import time
 
 # ---------- Admin Config ----------
-ADMIN_PASSWORD = "Admin160622"  # Change this to a secure password
+ADMIN_PASSWORD = "Admin2233"  # Change this to a secure password
 USERS_FILE = "users.csv"
 
 st.set_page_config(page_title="Health Assistant Dashboard", layout="centered")
